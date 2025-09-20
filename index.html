@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>4択クイズゲーム</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>4択クイズゲーム</h1>
+        <div id="quiz-container">
+            <p id="question"></p>
+            <div id="choices" class="choices-grid">
+                <button class="choice-btn"></button>
+                <button class="choice-btn"></button>
+                <button class="choice-btn"></button>
+                <button class="choice-btn"></button>
+            </div>
+            <div id="feedback"></div>
+        </div>
+        <div id="result-container" style="display: none;">
+            <h2>クイズ結果</h2>
+            <p>あなたの正解数は <span id="score">0</span> / <span id="total-questions">0</span> です。</p>
+            <button id="retry-btn">もう一度挑戦する</button>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
