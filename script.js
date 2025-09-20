@@ -1,12 +1,4 @@
-// ▼▼▼▼▼ ここから2箇所をあなたの情報に書き換えてください ▼▼▼▼▼
 
-// ステップ2-3でコピーした、あなたのウェブアプリのURLを貼り付け
-const API_URL = 'https://script.google.com/macros/s/AKfycbwnAXTx2Lb-3c5pb8_5fIzU6Nd_eeCbzN4nr_7wW1rf_C5EmlGkXLLXc-Q-nNgHpeNE3w/exec';
-
-// ステップ2-1で設定した、あなたの秘密鍵を貼り付け
-const SECRET_KEY = 'My3DQuizGameSecretKey777';
-
-// ▲▲▲▲▲ ここまでを書き換えてください ▲▲▲▲▲
 
 
 // --- これ以降のコードは変更不要です ---
