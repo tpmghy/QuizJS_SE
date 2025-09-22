@@ -25,6 +25,7 @@ const resultContainer = document.getElementById('result-container');
 const scoreElement = document.getElementById('score');
 const totalQuestionsElement = document.getElementById('total-questions');
 const resultGroupNameElement = document.getElementById('result-group-name');
+const saveImageButton = document.getElementById('save-image-btn'); // ▼▼▼ 追加 ▼▼▼
 const reviewButton = document.getElementById('review-btn');
 const backToStartButton = document.getElementById('back-to-start-btn');
 
@@ -32,7 +33,7 @@ const backToStartButton = document.getElementById('back-to-start-btn');
 const reviewContainer = document.getElementById('review-container');
 const reviewList = document.getElementById('review-list');
 const restartButton = document.getElementById('restart-btn');
-const reviewGroupNameElement = document.getElementById('review-group-name'); // ▼▼▼ 追加 ▼▼▼
+const reviewGroupNameElement = document.getElementById('review-group-name');
 
 
 /**
@@ -173,32 +174,73 @@ function showResult() {
 function showReview() {
     resultContainer.style.display = 'none';
     reviewContainer.style.display = 'block';
-
-    // ▼▼▼ 挑戦したカテゴリ名を表示する処理を追加 ▼▼▼
     reviewGroupNameElement.textContent = currentGroupName;
-    // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
-
     reviewList.innerHTML = '';
 
     userAnswers.forEach((answer, index) => {
         const reviewItem = document.createElement('div');
         reviewItem.className = 'review-item';
-
         const resultMark = answer.isCorrect ? '<span class="mark correct">正解 ✓</span>' : '<span class="mark incorrect">不正解 ✗</span>';
-        
         let answerHTML = `
             <p class="review-question">Q${index + 1}. ${answer.question} ${resultMark}</p>
             <p class="review-user-answer">あなたの回答: ${answer.userChoice}</p>
         `;
-        
         if (!answer.isCorrect) {
             answerHTML += `<p class="review-correct-answer">正解: ${answer.correctAnswer}</p>`;
         }
-
         reviewItem.innerHTML = answerHTML;
         reviewList.appendChild(reviewItem);
     });
 }
+
+/**
+ * ▼▼▼ 結果画面を画像として保存する関数（新規追加） ▼▼▼
+ */
+async function saveResultAsImage() {
+    // 処理中にボタンを無効化して連打を防ぐ
+    saveImageButton.disabled = true;
+    saveImageButton.textContent = '画像生成中...';
+
+    try {
+        // html2canvasを実行し、結果表示エリア(#result-container)をキャプチャ
+        const canvas = await html2canvas(resultContainer, {
+            backgroundColor: '#ffffff', // 背景が透明にならないように白を指定
+            windowWidth: document.documentElement.offsetWidth,
+            windowHeight: document.documentElement.offsetHeight,
+            // ページ全体のスクロールではなく、要素の位置を基準にする
+            scrollX: -window.scrollX,
+            scrollY: -window.scrollY,
+            // 画像の品質を上げる（デフォルトは1）
+            scale: 2
+        });
+
+        // canvasを画像データ(PNG形式)のURLに変換
+        const imageUrl = canvas.toDataURL('image/png');
+
+        // ダウンロード用の<a>リンク要素をメモリ上に作成
+        const downloadLink = document.createElement('a');
+        downloadLink.href = imageUrl;
+        
+        // ファイル名を生成 (例: quiz_result_2025-09-22.png)
+        const date = new Date();
+        const formattedDate = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
+        downloadLink.download = `quiz_result_${formattedDate}.png`;
+
+        // リンクをクリックさせてダウンロードを擬似的に実行
+        document.body.appendChild(downloadLink); // Firefoxで動作するために必要
+        downloadLink.click();
+        document.body.removeChild(downloadLink); // 後片付け
+
+    } catch (error) {
+        console.error('画像の生成に失敗しました:', error);
+        alert('画像の保存に失敗しました。');
+    } finally {
+        // 処理が終わったら（成功・失敗にかかわらず）ボタンを元の状態に戻す
+        saveImageButton.disabled = false;
+        saveImageButton.textContent = '結果を画像で保存';
+    }
+}
+// ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
 
 /**
  * スタート画面（カテゴリ選択画面）に戻る関数
@@ -224,6 +266,9 @@ startButton.addEventListener('click', () => {
     currentGroupName = groupSelect.options[groupSelect.selectedIndex].text;
     fetchQuizData(selectedGroupValue);
 });
+
+// 「結果を画像で保存」ボタン（結果画面） ▼▼▼ 追加 ▼▼▼
+saveImageButton.addEventListener('click', saveResultAsImage);
 
 // 「解答を振り返る」ボタン（結果画面）
 reviewButton.addEventListener('click', showReview);

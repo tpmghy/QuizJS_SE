@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>4択クイズゲーム</title>
     <link rel="stylesheet" href="style.css">
+    <!-- ▼▼▼ ここにライブラリ読み込みのscriptタグを追加 ▼▼▼ -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoVBL5rKcDFQAIwtzOcXjPzDCv1pvA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <!-- ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲ -->
 </head>
 <body>
     <div class="container">
@@ -37,16 +40,19 @@
             <h2>クイズ結果</h2>
             <p>挑戦したカテゴリ: <span id="result-group-name"></span></p>
             <p>あなたの正解数は <span id="score">0</span> / <span id="total-questions">0</span> です。</p>
-            <button id="review-btn">解答を振り返る</button>
-            <button id="back-to-start-btn">カテゴリ選択に戻る</button>
+            <!-- ▼▼▼ ボタンエリアを変更 ▼▼▼ -->
+            <div class="result-buttons">
+                <button id="save-image-btn">結果を画像で保存</button>
+                <button id="review-btn">解答を振り返る</button>
+                <button id="back-to-start-btn">カテゴリ選択に戻る</button>
+            </div>
+            <!-- ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲ -->
         </div>
 
         <!-- 解答一覧画面 -->
         <div id="review-container" style="display: none;">
             <h2>解答の振り返り</h2>
-            <!-- ▼▼▼ ここに挑戦カテゴリ表示用のpタグを追加 ▼▼▼ -->
             <p>挑戦したカテゴリ: <span id="review-group-name"></span></p>
-            <!-- ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲ -->
             <div id="review-list">
                 <!-- ここに解答一覧が動的に生成されます -->
             </div>
