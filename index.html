@@ -14,14 +14,27 @@
         <!-- スタート画面 -->
         <div id="start-container">
             <h2>挑戦するカテゴリを選んでください</h2>
-            <select id="group-select">
-                <option value="all">すべての問題</option>
-            </select>
+            <!-- ▼▼▼ 3階層のドロップダウン ▼▼▼ -->
+            <div class="category-selector">
+                <label for="group-large-select">大分類</label>
+                <select id="group-large-select">
+                    <option value="all">すべての問題</option>
+                </select>
+            </div>
+            <div id="medium-category-wrapper" class="category-selector" style="display: none;">
+                <label for="group-medium-select">中分類</label>
+                <select id="group-medium-select"></select>
+            </div>
+            <div id="small-category-wrapper" class="category-selector" style="display: none;">
+                <label for="group-small-select">小分類</label>
+                <select id="group-small-select"></select>
+            </div>
+            <!-- ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲ -->
             <button id="start-btn">クイズ開始！</button>
             <button id="history-btn" class="secondary-btn">学習履歴を見る</button>
         </div>
 
-        <!-- クイズ本体（最初は非表示） -->
+        <!-- (以降の画面構成は変更なし) -->
         <div id="quiz-container" style="display: none;">
             <p id="current-group" class="category-display"></p>
             <p id="question"></p>
@@ -33,8 +46,6 @@
             </div>
             <div id="feedback"></div>
         </div>
-
-        <!-- 結果表示（最初は非表示） -->
         <div id="result-container" style="display: none;">
             <h2>クイズ結果</h2>
             <p>挑戦したカテゴリ: <span id="result-group-name"></span></p>
@@ -44,31 +55,22 @@
                 <button id="back-to-start-btn">カテゴリ選択に戻る</button>
             </div>
         </div>
-
-        <!-- 解答一覧画面 -->
         <div id="review-container" style="display: none;">
             <h2>解答の振り返り</h2>
             <p>挑戦したカテゴリ: <span id="review-group-name"></span></p>
-            <div id="review-list">
-                <!-- ここに解答一覧が動的に生成されます -->
-            </div>
+            <div id="review-list"></div>
             <div class="result-buttons">
                 <button id="save-review-image-btn">解答を画像で保存</button>
                 <button id="restart-btn">カテゴリ選択に戻る</button>
             </div>
         </div>
-
-        <!-- 学習履歴画面 -->
         <div id="history-container" style="display: none;">
             <h2>学習履歴</h2>
             <p>これまでに解いた問題の正解・不正解の回数です。</p>
-            <div id="history-list">
-                <!-- ここに学習履歴が動的に生成されます -->
-            </div>
+            <div id="history-list"></div>
             <button id="back-to-start-from-history-btn">カテゴリ選択に戻る</button>
         </div>
     </div>
-    
     <script src="script.js"></script>
 </body>
 </html>
