@@ -21,13 +21,10 @@ body {
     text-align: center;
 }
 
-h1 {
+h1, h2 {
     color: #00529b;
-    margin-bottom: 25px;
-}
-
-h2 {
     margin-top: 0;
+    margin-bottom: 25px;
 }
 
 #start-container select, #start-container button {
@@ -44,7 +41,6 @@ h2 {
     border: none;
 }
 
-/* ▼▼▼ 追加したカテゴリ表示用のスタイル ▼▼▼ */
 .category-display {
     font-size: 0.9em;
     color: #6c757d;
@@ -52,7 +48,6 @@ h2 {
     margin-top: -10px;
     text-align: left;
 }
-/* ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲ */
 
 #question {
     font-size: 1.6em;
@@ -96,25 +91,76 @@ h2 {
     font-weight: bold;
     line-height: 1.5;
     min-height: 50px;
-    white-space: pre-wrap; /* 解説文の改行(\n)を反映させる */
+    white-space: pre-wrap;
 }
 
 #result-container p {
     font-size: 1.2em;
 }
 
-#retry-btn {
-    margin-top: 20px;
+#result-container button, #review-container button {
+    margin: 10px 5px 0;
     padding: 12px 25px;
-    font-size: 1.1em;
+    font-size: 1em;
     color: white;
-    background-color: #28a745;
     border: none;
     border-radius: 8px;
     cursor: pointer;
     transition: background-color 0.2s;
 }
 
-#retry-btn:hover {
-    background-color: #218838;
+#review-btn { background-color: #007bff; }
+#review-btn:hover { background-color: #0069d9; }
+
+#back-to-start-btn, #restart-btn { background-color: #28a745; }
+#back-to-start-btn:hover, #restart-btn:hover { background-color: #218838; }
+
+
+/* ▼▼▼ 解答一覧画面用のスタイル（ここから新規追加） ▼▼▼ */
+#review-list {
+    text-align: left;
+    max-height: 400px; /* コンテンツが多い場合にスクロールバーを出す */
+    overflow-y: auto;
+    border: 1px solid #eee;
+    padding: 10px;
+    border-radius: 8px;
 }
+
+.review-item {
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+}
+.review-item:last-child {
+    border-bottom: none;
+}
+
+.review-question {
+    font-weight: bold;
+    font-size: 1.1em;
+    margin-bottom: 10px;
+}
+
+.review-user-answer, .review-correct-answer {
+    margin: 5px 0 5px 20px;
+    padding-left: 15px;
+    border-left: 3px solid #ccc;
+}
+
+.review-correct-answer {
+    color: #28a745;
+    border-left-color: #28a745;
+}
+
+.review-user-answer.incorrect { /* ユーザーの回答が不正解だった場合のスタイル */
+    color: #dc3545;
+    border-left-color: #dc3545;
+}
+
+.mark {
+    font-size: 0.9em;
+    font-weight: bold;
+    margin-left: 10px;
+}
+.mark.correct { color: #28a745; }
+.mark.incorrect { color: #dc3545; }
+/* ▲▲▲ 解答一覧画面用のスタイル（ここまで新規追加） ▲▲▲ */

@@ -8,24 +8,30 @@ const SECRET_KEY = '__SECRET_KEY__';
  *  HTML要素の取得
  * =================================================================
  */
-// --- スタート画面の要素 ---
+// --- スタート画面 ---
 const startContainer = document.getElementById('start-container');
 const groupSelect = document.getElementById('group-select');
 const startButton = document.getElementById('start-btn');
 
-// --- クイズ画面の要素 ---
+// --- クイズ画面 ---
 const quizContainer = document.getElementById('quiz-container');
 const questionElement = document.getElementById('question');
 const choiceButtons = document.querySelectorAll('.choice-btn');
 const feedbackElement = document.getElementById('feedback');
-const currentGroupElement = document.getElementById('current-group'); // ▼▼▼ 追加 ▼▼▼
+const currentGroupElement = document.getElementById('current-group');
 
-// --- 結果画面の要素 ---
+// --- 結果画面 ---
 const resultContainer = document.getElementById('result-container');
 const scoreElement = document.getElementById('score');
 const totalQuestionsElement = document.getElementById('total-questions');
-const retryButton = document.getElementById('retry-btn');
-const resultGroupNameElement = document.getElementById('result-group-name'); // ▼▼▼ 追加 ▼▼▼
+const resultGroupNameElement = document.getElementById('result-group-name');
+const reviewButton = document.getElementById('review-btn'); // ▼▼▼ 追加 ▼▼▼
+const backToStartButton = document.getElementById('back-to-start-btn'); // ▼▼▼ ID変更 ▼▼▼
+
+// --- 解答一覧画面 ---
+const reviewContainer = document.getElementById('review-container'); // ▼▼▼ 追加 ▼▼▼
+const reviewList = document.getElementById('review-list'); // ▼▼▼ 追加 ▼▼▼
+const restartButton = document.getElementById('restart-btn'); // ▼▼▼ 追加 ▼▼▼
 
 
 /**
@@ -36,7 +42,8 @@ const resultGroupNameElement = document.getElementById('result-group-name'); // 
 let quizData = [];
 let currentQuestionIndex = 0;
 let score = 0;
-let currentGroupName = ''; // ▼▼▼ 現在のグループ名を保存する変数を追加 ▼▼▼
+let currentGroupName = '';
+let userAnswers = []; // ▼▼▼ ユーザーの全解答を保存する配列を追加 ▼▼▼
 
 
 /**
@@ -47,7 +54,6 @@ let currentGroupName = ''; // ▼▼▼ 現在のグループ名を保存する�
 
 /**
  * APIからクイズデータを非同期で取得する関数
- * @param {string} group - ユーザーが選択したグループ名 ('all' は全問題)
  */
 async function fetchQuizData(group) {
     quizContainer.style.display = 'block';
@@ -59,7 +65,6 @@ async function fetchQuizData(group) {
         if (group !== 'all') {
             url += `&group=${encodeURIComponent(group)}`;
         }
-
         const response = await fetch(url);
         if (!response.ok) throw new Error(`APIエラー: ${response.status}`);
         
@@ -81,9 +86,11 @@ async function fetchQuizData(group) {
 function startQuiz() {
     currentQuestionIndex = 0;
     score = 0;
+    userAnswers = []; // ▼▼▼ クイズ開始時に解答履歴をリセット ▼▼▼
     
     startContainer.style.display = 'none';
     resultContainer.style.display = 'none';
+    reviewContainer.style.display = 'none'; // ▼▼▼ 追加 ▼▼▼
     quizContainer.style.display = 'block';
 
     showQuestion();
@@ -93,10 +100,7 @@ function startQuiz() {
  * 現在の問題と選択肢を画面に表示する関数
  */
 function showQuestion() {
-    // ▼▼▼ 現在のカテゴリ名を表示する処理を追加 ▼▼▼
     currentGroupElement.textContent = `カテゴリ: ${currentGroupName}`;
-    // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
-
     const currentQuestion = quizData[currentQuestionIndex];
     questionElement.textContent = `第${currentQuestionIndex + 1}問: ${currentQuestion.question}`;
     feedbackElement.textContent = '';
@@ -112,15 +116,23 @@ function showQuestion() {
 }
 
 /**
- * ユーザーの回答を判定する関数
- * @param {number} selectedIndex - ユーザーがクリックした選択肢の番号 (0-3)
+ * ユーザーの回答を判定し、結果を保存する関数
  */
 function checkAnswer(selectedIndex) {
     choiceButtons.forEach(button => button.disabled = true);
-
     const currentQuestion = quizData[currentQuestionIndex];
+    const isCorrect = selectedIndex === currentQuestion.answerIndex;
 
-    if (selectedIndex === currentQuestion.answerIndex) {
+    // ▼▼▼ ユーザーの解答をオブジェクトとして記録 ▼▼▼
+    userAnswers.push({
+        question: currentQuestion.question,
+        userChoice: currentQuestion.choices[selectedIndex],
+        correctAnswer: currentQuestion.choices[currentQuestion.answerIndex],
+        isCorrect: isCorrect
+    });
+    // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
+
+    if (isCorrect) {
         score++;
         feedbackElement.textContent = `正解！🎉\n解説: ${currentQuestion.explanation}`;
         feedbackElement.style.backgroundColor = '#e6ffed';
@@ -151,14 +163,40 @@ function checkAnswer(selectedIndex) {
 function showResult() {
     quizContainer.style.display = 'none';
     resultContainer.style.display = 'block';
-
-    // ▼▼▼ 挑戦したカテゴリ名を表示する処理を追加 ▼▼▼
     resultGroupNameElement.textContent = currentGroupName;
-    // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
-
     scoreElement.textContent = score;
     totalQuestionsElement.textContent = quizData.length;
 }
+
+/**
+ * ▼▼▼ 解答一覧を生成して表示する関数（新規追加） ▼▼▼
+ */
+function showReview() {
+    resultContainer.style.display = 'none';
+    reviewContainer.style.display = 'block';
+
+    reviewList.innerHTML = ''; // 前回の内容をクリア
+
+    userAnswers.forEach((answer, index) => {
+        const reviewItem = document.createElement('div');
+        reviewItem.className = 'review-item';
+
+        const resultMark = answer.isCorrect ? '<span class="mark correct">正解 ✓</span>' : '<span class="mark incorrect">不正解 ✗</span>';
+        
+        let answerHTML = `
+            <p class="review-question">Q${index + 1}. ${answer.question} ${resultMark}</p>
+            <p class="review-user-answer">あなたの回答: ${answer.userChoice}</p>
+        `;
+        
+        if (!answer.isCorrect) {
+            answerHTML += `<p class="review-correct-answer">正解: ${answer.correctAnswer}</p>`;
+        }
+
+        reviewItem.innerHTML = answerHTML;
+        reviewList.appendChild(reviewItem);
+    });
+}
+// ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
 
 /**
  * スタート画面（カテゴリ選択画面）に戻る関数
@@ -166,6 +204,7 @@ function showResult() {
 function showStartScreen() {
     resultContainer.style.display = 'none';
     quizContainer.style.display = 'none';
+    reviewContainer.style.display = 'none'; // ▼▼▼ 追加 ▼▼▼
     startContainer.style.display = 'block';
 }
 
@@ -176,32 +215,28 @@ function showStartScreen() {
  * =================================================================
  */
 
-// 「クイズ開始！」ボタンがクリックされた時の処理
+// 「クイズ開始！」ボタン
 startButton.addEventListener('click', () => {
     startContainer.style.display = 'none';
     const selectedGroupValue = groupSelect.value;
-
-    // ▼▼▼ 選択されたグループの表示名を変数に保存 ▼▼▼
-    // .valueだと 'all' になるが、.textだと 'すべての問題' という表示テキストが取れる
     currentGroupName = groupSelect.options[groupSelect.selectedIndex].text;
-    // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
-
     fetchQuizData(selectedGroupValue);
 });
 
-// 「カテゴリ選択に戻る」ボタン (結果画面) がクリックされた時の処理
-retryButton.addEventListener('click', showStartScreen);
+// 「解答を振り返る」ボタン（結果画面） ▼▼▼ 追加 ▼▼▼
+reviewButton.addEventListener('click', showReview);
+
+// 「カテゴリ選択に戻る」ボタン（結果画面）
+backToStartButton.addEventListener('click', showStartScreen);
+
+// 「カテゴリ選択に戻る」ボタン（解答一覧画面） ▼▼▼ 追加 ▼▼▼
+restartButton.addEventListener('click', showStartScreen);
 
 
 /**
  * =================================================================
  *  初期化処理
  * =================================================================
- */
-
-/**
- * ページ読み込み時に実行される関数。
- * APIからグループ一覧を取得し、セレクトボックスを動的に生成する。
  */
 async function initializePage() {
     groupSelect.disabled = true;
@@ -221,9 +256,7 @@ async function initializePage() {
         groupSelect.removeChild(loadingOption);
         
         groups.forEach(group => {
-            const option = document.createElement('option');
-            option.value = group;
-            option.textContent = group;
+            const option = new Option(group, group);
             groupSelect.appendChild(option);
         });
 
