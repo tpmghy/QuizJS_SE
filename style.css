@@ -99,18 +99,17 @@ h1, h2 {
     font-size: 1.2em;
 }
 
-/* ▼▼▼ 結果画面のボタンエリアのスタイル ▼▼▼ */
+/* ▼▼▼ ボタンコンテナと各ボタンのスタイル ▼▼▼ */
 .result-buttons {
     display: flex;
-    flex-wrap: wrap; /* 画面が狭い時に折り返す */
+    flex-wrap: wrap;
     justify-content: center;
     gap: 10px;
     margin-top: 25px;
 }
 
-#result-container .result-buttons button, 
-#review-container button {
-    margin: 0; /* 個別のmarginをリセット */
+.result-buttons button {
+    margin: 0;
     padding: 12px 20px;
     font-size: 1em;
     color: white;
@@ -120,9 +119,9 @@ h1, h2 {
     transition: background-color 0.2s;
 }
 
-#save-image-btn { background-color: #ffc107; color: #212529; }
-#save-image-btn:hover { background-color: #e0a800; }
-#save-image-btn:disabled { background-color: #e9ecef; color: #6c757d; cursor: wait; }
+#save-review-image-btn { background-color: #ffc107; color: #212529; }
+#save-review-image-btn:hover { background-color: #e0a800; }
+#save-review-image-btn:disabled { background-color: #e9ecef; color: #6c757d; cursor: wait; }
 
 #review-btn { background-color: #007bff; }
 #review-btn:hover { background-color: #0069d9; }

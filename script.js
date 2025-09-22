@@ -25,7 +25,6 @@ const resultContainer = document.getElementById('result-container');
 const scoreElement = document.getElementById('score');
 const totalQuestionsElement = document.getElementById('total-questions');
 const resultGroupNameElement = document.getElementById('result-group-name');
-const saveImageButton = document.getElementById('save-image-btn'); // ▼▼▼ 追加 ▼▼▼
 const reviewButton = document.getElementById('review-btn');
 const backToStartButton = document.getElementById('back-to-start-btn');
 
@@ -34,6 +33,7 @@ const reviewContainer = document.getElementById('review-container');
 const reviewList = document.getElementById('review-list');
 const restartButton = document.getElementById('restart-btn');
 const reviewGroupNameElement = document.getElementById('review-group-name');
+const saveReviewImageButton = document.getElementById('save-review-image-btn'); // ▼▼▼ 参照先を変更 ▼▼▼
 
 
 /**
@@ -194,53 +194,46 @@ function showReview() {
 }
 
 /**
- * ▼▼▼ 結果画面を画像として保存する関数（新規追加） ▼▼▼
+ * 解答一覧画面を画像として保存する関数
  */
-async function saveResultAsImage() {
+async function saveReviewAsImage() {
     // 処理中にボタンを無効化して連打を防ぐ
-    saveImageButton.disabled = true;
-    saveImageButton.textContent = '画像生成中...';
+    saveReviewImageButton.disabled = true;
+    saveReviewImageButton.textContent = '画像生成中...';
 
     try {
-        // html2canvasを実行し、結果表示エリア(#result-container)をキャプチャ
-        const canvas = await html2canvas(resultContainer, {
-            backgroundColor: '#ffffff', // 背景が透明にならないように白を指定
+        // html2canvasを実行し、解答一覧エリア(#review-container)をキャプチャ
+        const canvas = await html2canvas(reviewContainer, {
+            backgroundColor: '#ffffff',
             windowWidth: document.documentElement.offsetWidth,
             windowHeight: document.documentElement.offsetHeight,
-            // ページ全体のスクロールではなく、要素の位置を基準にする
             scrollX: -window.scrollX,
             scrollY: -window.scrollY,
-            // 画像の品質を上げる（デフォルトは1）
             scale: 2
         });
 
-        // canvasを画像データ(PNG形式)のURLに変換
         const imageUrl = canvas.toDataURL('image/png');
-
-        // ダウンロード用の<a>リンク要素をメモリ上に作成
         const downloadLink = document.createElement('a');
-        downloadLink.href = imageUrl;
         
-        // ファイル名を生成 (例: quiz_result_2025-09-22.png)
         const date = new Date();
         const formattedDate = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
-        downloadLink.download = `quiz_result_${formattedDate}.png`;
+        // ファイル名を変更
+        downloadLink.download = `quiz_review_${formattedDate}.png`;
+        downloadLink.href = imageUrl;
 
-        // リンクをクリックさせてダウンロードを擬似的に実行
-        document.body.appendChild(downloadLink); // Firefoxで動作するために必要
+        document.body.appendChild(downloadLink);
         downloadLink.click();
-        document.body.removeChild(downloadLink); // 後片付け
+        document.body.removeChild(downloadLink);
 
     } catch (error) {
         console.error('画像の生成に失敗しました:', error);
         alert('画像の保存に失敗しました。');
     } finally {
-        // 処理が終わったら（成功・失敗にかかわらず）ボタンを元の状態に戻す
-        saveImageButton.disabled = false;
-        saveImageButton.textContent = '結果を画像で保存';
+        // 処理が終わったらボタンを元の状態に戻す
+        saveReviewImageButton.disabled = false;
+        saveReviewImageButton.textContent = '解答を画像で保存';
     }
 }
-// ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
 
 /**
  * スタート画面（カテゴリ選択画面）に戻る関数
@@ -267,14 +260,14 @@ startButton.addEventListener('click', () => {
     fetchQuizData(selectedGroupValue);
 });
 
-// 「結果を画像で保存」ボタン（結果画面） ▼▼▼ 追加 ▼▼▼
-saveImageButton.addEventListener('click', saveResultAsImage);
-
 // 「解答を振り返る」ボタン（結果画面）
 reviewButton.addEventListener('click', showReview);
 
 // 「カテゴリ選択に戻る」ボタン（結果画面）
 backToStartButton.addEventListener('click', showStartScreen);
+
+// 「解答を画像で保存」ボタン（解答一覧画面） ▼▼▼ 参照先と関数名を変更 ▼▼▼
+saveReviewImageButton.addEventListener('click', saveReviewAsImage);
 
 // 「カテゴリ選択に戻る」ボタン（解答一覧画面）
 restartButton.addEventListener('click', showStartScreen);
