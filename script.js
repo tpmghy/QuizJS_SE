@@ -33,7 +33,7 @@ const reviewContainer = document.getElementById('review-container');
 const reviewList = document.getElementById('review-list');
 const restartButton = document.getElementById('restart-btn');
 const reviewGroupNameElement = document.getElementById('review-group-name');
-const saveReviewImageButton = document.getElementById('save-review-image-btn'); // ▼▼▼ 参照先を変更 ▼▼▼
+const saveReviewImageButton = document.getElementById('save-review-image-btn');
 
 
 /**
@@ -105,7 +105,7 @@ function showQuestion() {
     currentGroupElement.textContent = `カテゴリ: ${currentGroupName}`;
     const currentQuestion = quizData[currentQuestionIndex];
     questionElement.textContent = `第${currentQuestionIndex + 1}問: ${currentQuestion.question}`;
-    feedbackElement.textContent = '';
+    feedbackElement.innerHTML = ''; // innerHTMLにすることで、ボタンも確実に消去
     feedbackElement.style.backgroundColor = 'transparent';
     
     choiceButtons.forEach((button, index) => {
@@ -118,7 +118,7 @@ function showQuestion() {
 }
 
 /**
- * ユーザーの回答を判定し、結果を保存する関数
+ * ユーザーの回答を判定し、次の問題へ進むボタンを表示する関数
  */
 function checkAnswer(selectedIndex) {
     choiceButtons.forEach(button => button.disabled = true);
@@ -132,29 +132,49 @@ function checkAnswer(selectedIndex) {
         isCorrect: isCorrect
     });
 
+    // ▼▼▼ ここからが大きな変更点 ▼▼▼
+
+    // フィードバックのテキスト部分を作成
+    const feedbackText = document.createElement('p');
     if (isCorrect) {
         score++;
-        feedbackElement.textContent = `正解！🎉\n解説: ${currentQuestion.explanation}`;
+        feedbackText.innerHTML = `正解！🎉<br>解説: ${currentQuestion.explanation}`;
         feedbackElement.style.backgroundColor = '#e6ffed';
         choiceButtons[selectedIndex].style.borderColor = '#28a745';
     } 
     else {
         const correctAnswerText = currentQuestion.choices[currentQuestion.answerIndex];
-        feedbackElement.textContent = `不正解...😢 正解は「${correctAnswerText}」\n解説: ${currentQuestion.explanation}`;
+        feedbackText.innerHTML = `不正解...😢 正解は「${correctAnswerText}」<br>解説: ${currentQuestion.explanation}`;
         feedbackElement.style.backgroundColor = '#ffebee';
         choiceButtons[selectedIndex].style.borderColor = '#dc3545';
         choiceButtons[currentQuestion.answerIndex].style.backgroundColor = '#d1e7dd';
     }
-    
-    setTimeout(() => {
-        currentQuestionIndex++;
-        if (currentQuestionIndex < quizData.length) {
-            showQuestion();
-        } 
-        else {
-            showResult();
+
+    // まずテキストをフィードバックエリアに追加
+    feedbackElement.innerHTML = ''; // 中身を一旦空にする
+    feedbackElement.appendChild(feedbackText);
+
+    // 「次に進む」ボタンを作成
+    const nextButton = document.createElement('button');
+    nextButton.className = 'next-btn';
+
+    // これが最後の問題かどうかを判定
+    const isLastQuestion = currentQuestionIndex === quizData.length - 1;
+    nextButton.textContent = isLastQuestion ? '結果を見る' : '次の問題へ';
+
+    // ボタンがクリックされた時の処理を定義
+    nextButton.addEventListener('click', () => {
+        if (isLastQuestion) {
+            showResult(); // 最後の問題なら結果表示
+        } else {
+            currentQuestionIndex++;
+            showQuestion(); // そうでなければ次の問題へ
         }
-    }, 3500);
+    });
+
+    // 作成したボタンをフィードバックエリアに追加
+    feedbackElement.appendChild(nextButton);
+    // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
 }
 
 /**
@@ -197,12 +217,9 @@ function showReview() {
  * 解答一覧画面を画像として保存する関数
  */
 async function saveReviewAsImage() {
-    // 処理中にボタンを無効化して連打を防ぐ
     saveReviewImageButton.disabled = true;
     saveReviewImageButton.textContent = '画像生成中...';
-
     try {
-        // html2canvasを実行し、解答一覧エリア(#review-container)をキャプチャ
         const canvas = await html2canvas(reviewContainer, {
             backgroundColor: '#ffffff',
             windowWidth: document.documentElement.offsetWidth,
@@ -211,25 +228,19 @@ async function saveReviewAsImage() {
             scrollY: -window.scrollY,
             scale: 2
         });
-
         const imageUrl = canvas.toDataURL('image/png');
         const downloadLink = document.createElement('a');
-        
         const date = new Date();
         const formattedDate = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
-        // ファイル名を変更
         downloadLink.download = `quiz_review_${formattedDate}.png`;
         downloadLink.href = imageUrl;
-
         document.body.appendChild(downloadLink);
         downloadLink.click();
         document.body.removeChild(downloadLink);
-
     } catch (error) {
         console.error('画像の生成に失敗しました:', error);
         alert('画像の保存に失敗しました。');
     } finally {
-        // 処理が終わったらボタンを元の状態に戻す
         saveReviewImageButton.disabled = false;
         saveReviewImageButton.textContent = '解答を画像で保存';
     }
@@ -245,33 +256,21 @@ function showStartScreen() {
     startContainer.style.display = 'block';
 }
 
-
 /**
  * =================================================================
  *  イベントリスナーの設定
  * =================================================================
  */
-
-// 「クイズ開始！」ボタン
 startButton.addEventListener('click', () => {
     startContainer.style.display = 'none';
     const selectedGroupValue = groupSelect.value;
     currentGroupName = groupSelect.options[groupSelect.selectedIndex].text;
     fetchQuizData(selectedGroupValue);
 });
-
-// 「解答を振り返る」ボタン（結果画面）
 reviewButton.addEventListener('click', showReview);
-
-// 「カテゴリ選択に戻る」ボタン（結果画面）
 backToStartButton.addEventListener('click', showStartScreen);
-
-// 「解答を画像で保存」ボタン（解答一覧画面） ▼▼▼ 参照先と関数名を変更 ▼▼▼
 saveReviewImageButton.addEventListener('click', saveReviewAsImage);
-
-// 「カテゴリ選択に戻る」ボタン（解答一覧画面）
 restartButton.addEventListener('click', showStartScreen);
-
 
 /**
  * =================================================================
@@ -281,25 +280,19 @@ restartButton.addEventListener('click', showStartScreen);
 async function initializePage() {
     groupSelect.disabled = true;
     startButton.disabled = true;
-    
     const loadingOption = new Option('カテゴリを読み込み中...', '', true, true);
     loadingOption.disabled = true;
     groupSelect.appendChild(loadingOption);
-    
     try {
         const url = `${API_URL}?key=${SECRET_KEY}&action=get_groups`;
         const response = await fetch(url);
         if (!response.ok) throw new Error('カテゴリの取得に失敗しました');
-        
         const groups = await response.json();
-        
         groupSelect.removeChild(loadingOption);
-        
         groups.forEach(group => {
             const option = new Option(group, group);
             groupSelect.appendChild(option);
         });
-
     } catch (error) {
         console.error(error);
         loadingOption.textContent = '読み込みに失敗';

@@ -91,15 +91,42 @@ h1, h2 {
     font-weight: bold;
     line-height: 1.5;
     min-height: 50px;
+}
+
+/* ▼▼▼ feedback内のテキストのスタイル ▼▼▼ */
+#feedback p {
+    margin: 0;
+    padding: 0;
     white-space: pre-wrap;
 }
+
+/* ▼▼▼ 次へ進むボタンのスタイル（新規追加） ▼▼▼ */
+.next-btn {
+    display: block;
+    width: 100%;
+    max-width: 200px;
+    margin: 15px auto 0;
+    padding: 10px 20px;
+    font-size: 1em;
+    font-weight: bold;
+    color: white;
+    background-color: #007bff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.next-btn:hover {
+    background-color: #0069d9;
+}
+
 
 #result-container p,
 #review-container > p {
     font-size: 1.2em;
 }
 
-/* ▼▼▼ ボタンコンテナと各ボタンのスタイル ▼▼▼ */
 .result-buttons {
     display: flex;
     flex-wrap: wrap;
