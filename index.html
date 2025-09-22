@@ -5,9 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>4択クイズゲーム</title>
     <link rel="stylesheet" href="style.css">
-    <!-- ▼▼▼ ここにライブラリ読み込みのscriptタグを追加 ▼▼▼ -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoVBL5rKcDFQAIwtzOcXjPzDCv1pvA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <!-- ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲ -->
+    
+    <!-- ▼▼▼ 変更点：この行の integrity と crossorigin 属性を削除しました ▼▼▼ -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <!-- ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲ -->
+
 </head>
 <body>
     <div class="container">
@@ -40,13 +42,11 @@
             <h2>クイズ結果</h2>
             <p>挑戦したカテゴリ: <span id="result-group-name"></span></p>
             <p>あなたの正解数は <span id="score">0</span> / <span id="total-questions">0</span> です。</p>
-            <!-- ▼▼▼ ボタンエリアを変更 ▼▼▼ -->
             <div class="result-buttons">
                 <button id="save-image-btn">結果を画像で保存</button>
                 <button id="review-btn">解答を振り返る</button>
                 <button id="back-to-start-btn">カテゴリ選択に戻る</button>
             </div>
-            <!-- ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲ -->
         </div>
 
         <!-- 解答一覧画面 -->
