@@ -26,11 +26,39 @@ h1 {
     margin-bottom: 25px;
 }
 
+h2 {
+    margin-top: 0;
+}
+
+#start-container select, #start-container button {
+    font-size: 1.1em;
+    padding: 10px 15px;
+    margin: 10px;
+    border-radius: 8px;
+}
+
+#start-container button {
+    cursor: pointer;
+    background-color: #007bff;
+    color: white;
+    border: none;
+}
+
+/* ▼▼▼ 追加したカテゴリ表示用のスタイル ▼▼▼ */
+.category-display {
+    font-size: 0.9em;
+    color: #6c757d;
+    margin-bottom: -10px;
+    margin-top: -10px;
+    text-align: left;
+}
+/* ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲ */
+
 #question {
     font-size: 1.6em;
     margin-bottom: 25px;
     line-height: 1.4;
-    min-height: 80px; /* 問題文の高さが変動してもレイアウトが崩れないように */
+    min-height: 80px;
 }
 
 .choices-grid {
@@ -68,6 +96,11 @@ h1 {
     font-weight: bold;
     line-height: 1.5;
     min-height: 50px;
+    white-space: pre-wrap; /* 解説文の改行(\n)を反映させる */
+}
+
+#result-container p {
+    font-size: 1.2em;
 }
 
 #retry-btn {
