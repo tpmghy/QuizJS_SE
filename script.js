@@ -50,7 +50,7 @@ let currentQuestionIndex = 0;
 let score = 0;
 let currentGroupName = '';
 let userAnswers = [];
-let categoryTree = {}; // カテゴリの階層構造を保存するオブジェクト
+let categoryTree = {};
 
 /**
  * =================================================================
@@ -237,71 +237,49 @@ function showStartScreen() {
  */
 startButton.addEventListener('click', () => {
     startContainer.style.display = 'none';
-    
     const large = largeCategorySelect.value;
     const medium = mediumCategorySelect.value;
     const small = smallCategorySelect.value;
-
     const params = { large };
     if (medium && medium !== 'all') params.medium = medium;
     if (small && small !== 'all') params.small = small;
-
-    // 表示用のカテゴリ名を生成
     let nameParts = [];
     if (large && large !== 'all') nameParts.push(largeCategorySelect.options[largeCategorySelect.selectedIndex].text);
     if (medium && medium !== 'all') nameParts.push(mediumCategorySelect.options[mediumCategorySelect.selectedIndex].text);
     if (small && small !== 'all') nameParts.push(smallCategorySelect.options[smallCategorySelect.selectedIndex].text);
     currentGroupName = nameParts.length > 0 ? nameParts.join(' > ') : 'すべての問題';
-
     fetchQuizData(params);
 });
-
 reviewButton.addEventListener('click', showReview);
 backToStartButton.addEventListener('click', showStartScreen);
 saveReviewImageButton.addEventListener('click', saveReviewAsImage);
 restartButton.addEventListener('click', showStartScreen);
 historyButton.addEventListener('click', showHistory);
 backToStartFromHistoryButton.addEventListener('click', showStartScreen);
-
-// ▼▼▼ 連動ドロップダウンのイベントリスナー ▼▼▼
 largeCategorySelect.addEventListener('change', (e) => {
     const selectedLarge = e.target.value;
-    // 中分類と小分類をリセット
     mediumCategorySelect.innerHTML = '';
     smallCategorySelect.innerHTML = '';
     mediumCategoryWrapper.style.display = 'none';
     smallCategoryWrapper.style.display = 'none';
-
-    if (selectedLarge === 'all' || !categoryTree[selectedLarge]) {
-        return;
-    }
-
+    if (selectedLarge === 'all' || !categoryTree[selectedLarge]) { return; }
     const mediumCats = Object.keys(categoryTree[selectedLarge]);
     if (mediumCats.length > 0) {
         mediumCategorySelect.appendChild(new Option('すべての中分類', 'all'));
-        mediumCats.forEach(medium => {
-            mediumCategorySelect.appendChild(new Option(medium, medium));
-        });
+        mediumCats.forEach(medium => { mediumCategorySelect.appendChild(new Option(medium, medium)); });
         mediumCategoryWrapper.style.display = 'block';
     }
 });
-
 mediumCategorySelect.addEventListener('change', (e) => {
     const selectedLarge = largeCategorySelect.value;
     const selectedMedium = e.target.value;
     smallCategorySelect.innerHTML = '';
     smallCategoryWrapper.style.display = 'none';
-
-    if (selectedMedium === 'all' || !categoryTree[selectedLarge] || !categoryTree[selectedLarge][selectedMedium]) {
-        return;
-    }
-
+    if (selectedMedium === 'all' || !categoryTree[selectedLarge] || !categoryTree[selectedLarge][selectedMedium]) { return; }
     const smallCats = categoryTree[selectedLarge][selectedMedium];
     if (smallCats.length > 0) {
         smallCategorySelect.appendChild(new Option('すべての小分類', 'all'));
-        smallCats.forEach(small => {
-            smallCategorySelect.appendChild(new Option(small, small));
-        });
+        smallCats.forEach(small => { smallCategorySelect.appendChild(new Option(small, small)); });
         smallCategoryWrapper.style.display = 'block';
     }
 });
@@ -312,7 +290,9 @@ mediumCategorySelect.addEventListener('change', (e) => {
  *  初期化処理
  * =================================================================
  */
-async function initializePage() {
+
+// ▼▼▼ 変更点: カテゴリ選択画面を初期化する部分を別の関数に分離 ▼▼▼
+async function initializeCategorySelector() {
     largeCategorySelect.disabled = true;
     startButton.disabled = true;
     const loadingOption = new Option('カテゴリを読み込み中...', '', true, true);
@@ -339,4 +319,26 @@ async function initializePage() {
         startButton.disabled = false;
     }
 }
+
+// ▼▼▼ 変更点: ページ読み込み時のメイン処理を新設 ▼▼▼
+function initializePage() {
+    // 現在のURLからクエリパラメータを読み取る
+    const params = new URLSearchParams(window.location.search);
+    const large = params.get('large');
+    const medium = params.get('medium');
+    const small = params.get('small');
+
+    // もし必須のパラメータ(large, medium, small)が全て揃っていたら
+    if (large && medium && small) {
+        // スタート画面を隠して、直接クイズを開始する
+        startContainer.style.display = 'none';
+        currentGroupName = `${large} > ${medium} > ${small}`;
+        fetchQuizData({ large, medium, small });
+    } else {
+        // パラメータがなければ、通常通りカテゴリ選択画面を初期化する
+        initializeCategorySelector();
+    }
+}
+
+// ページの読み込みが始まったら、この初期化処理を一番最初に実行する
 initializePage();
