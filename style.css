@@ -94,7 +94,9 @@ h1, h2 {
     white-space: pre-wrap;
 }
 
-#result-container p {
+/* ▼▼▼ result-containerとreview-containerのpタグに共通のスタイルを適用 ▼▼▼ */
+#result-container p,
+#review-container > p { /* direct child selector to avoid styling p tags inside the list */
     font-size: 1.2em;
 }
 
@@ -116,14 +118,15 @@ h1, h2 {
 #back-to-start-btn:hover, #restart-btn:hover { background-color: #218838; }
 
 
-/* ▼▼▼ 解答一覧画面用のスタイル（ここから新規追加） ▼▼▼ */
+/* 解答一覧画面用のスタイル */
 #review-list {
     text-align: left;
-    max-height: 400px; /* コンテンツが多い場合にスクロールバーを出す */
+    max-height: 400px;
     overflow-y: auto;
     border: 1px solid #eee;
     padding: 10px;
     border-radius: 8px;
+    margin-top: 20px;
 }
 
 .review-item {
@@ -151,7 +154,7 @@ h1, h2 {
     border-left-color: #28a745;
 }
 
-.review-user-answer.incorrect { /* ユーザーの回答が不正解だった場合のスタイル */
+.review-user-answer.incorrect {
     color: #dc3545;
     border-left-color: #dc3545;
 }
@@ -163,4 +166,3 @@ h1, h2 {
 }
 .mark.correct { color: #28a745; }
 .mark.incorrect { color: #dc3545; }
-/* ▲▲▲ 解答一覧画面用のスタイル（ここまで新規追加） ▲▲▲ */

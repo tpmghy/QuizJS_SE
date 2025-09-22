@@ -25,13 +25,14 @@ const resultContainer = document.getElementById('result-container');
 const scoreElement = document.getElementById('score');
 const totalQuestionsElement = document.getElementById('total-questions');
 const resultGroupNameElement = document.getElementById('result-group-name');
-const reviewButton = document.getElementById('review-btn'); // ▼▼▼ 追加 ▼▼▼
-const backToStartButton = document.getElementById('back-to-start-btn'); // ▼▼▼ ID変更 ▼▼▼
+const reviewButton = document.getElementById('review-btn');
+const backToStartButton = document.getElementById('back-to-start-btn');
 
 // --- 解答一覧画面 ---
-const reviewContainer = document.getElementById('review-container'); // ▼▼▼ 追加 ▼▼▼
-const reviewList = document.getElementById('review-list'); // ▼▼▼ 追加 ▼▼▼
-const restartButton = document.getElementById('restart-btn'); // ▼▼▼ 追加 ▼▼▼
+const reviewContainer = document.getElementById('review-container');
+const reviewList = document.getElementById('review-list');
+const restartButton = document.getElementById('restart-btn');
+const reviewGroupNameElement = document.getElementById('review-group-name'); // ▼▼▼ 追加 ▼▼▼
 
 
 /**
@@ -43,7 +44,7 @@ let quizData = [];
 let currentQuestionIndex = 0;
 let score = 0;
 let currentGroupName = '';
-let userAnswers = []; // ▼▼▼ ユーザーの全解答を保存する配列を追加 ▼▼▼
+let userAnswers = [];
 
 
 /**
@@ -86,11 +87,11 @@ async function fetchQuizData(group) {
 function startQuiz() {
     currentQuestionIndex = 0;
     score = 0;
-    userAnswers = []; // ▼▼▼ クイズ開始時に解答履歴をリセット ▼▼▼
+    userAnswers = [];
     
     startContainer.style.display = 'none';
     resultContainer.style.display = 'none';
-    reviewContainer.style.display = 'none'; // ▼▼▼ 追加 ▼▼▼
+    reviewContainer.style.display = 'none';
     quizContainer.style.display = 'block';
 
     showQuestion();
@@ -123,14 +124,12 @@ function checkAnswer(selectedIndex) {
     const currentQuestion = quizData[currentQuestionIndex];
     const isCorrect = selectedIndex === currentQuestion.answerIndex;
 
-    // ▼▼▼ ユーザーの解答をオブジェクトとして記録 ▼▼▼
     userAnswers.push({
         question: currentQuestion.question,
         userChoice: currentQuestion.choices[selectedIndex],
         correctAnswer: currentQuestion.choices[currentQuestion.answerIndex],
         isCorrect: isCorrect
     });
-    // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
 
     if (isCorrect) {
         score++;
@@ -169,13 +168,17 @@ function showResult() {
 }
 
 /**
- * ▼▼▼ 解答一覧を生成して表示する関数（新規追加） ▼▼▼
+ * 解答一覧を生成して表示する関数
  */
 function showReview() {
     resultContainer.style.display = 'none';
     reviewContainer.style.display = 'block';
 
-    reviewList.innerHTML = ''; // 前回の内容をクリア
+    // ▼▼▼ 挑戦したカテゴリ名を表示する処理を追加 ▼▼▼
+    reviewGroupNameElement.textContent = currentGroupName;
+    // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
+
+    reviewList.innerHTML = '';
 
     userAnswers.forEach((answer, index) => {
         const reviewItem = document.createElement('div');
@@ -196,7 +199,6 @@ function showReview() {
         reviewList.appendChild(reviewItem);
     });
 }
-// ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
 
 /**
  * スタート画面（カテゴリ選択画面）に戻る関数
@@ -204,7 +206,7 @@ function showReview() {
 function showStartScreen() {
     resultContainer.style.display = 'none';
     quizContainer.style.display = 'none';
-    reviewContainer.style.display = 'none'; // ▼▼▼ 追加 ▼▼▼
+    reviewContainer.style.display = 'none';
     startContainer.style.display = 'block';
 }
 
@@ -223,13 +225,13 @@ startButton.addEventListener('click', () => {
     fetchQuizData(selectedGroupValue);
 });
 
-// 「解答を振り返る」ボタン（結果画面） ▼▼▼ 追加 ▼▼▼
+// 「解答を振り返る」ボタン（結果画面）
 reviewButton.addEventListener('click', showReview);
 
 // 「カテゴリ選択に戻る」ボタン（結果画面）
 backToStartButton.addEventListener('click', showStartScreen);
 
-// 「カテゴリ選択に戻る」ボタン（解答一覧画面） ▼▼▼ 追加 ▼▼▼
+// 「カテゴリ選択に戻る」ボタン（解答一覧画面）
 restartButton.addEventListener('click', showStartScreen);
 
 
