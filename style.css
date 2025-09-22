@@ -30,8 +30,10 @@ h1, h2 {
 #start-container select, #start-container button {
     font-size: 1.1em;
     padding: 10px 15px;
-    margin: 10px;
+    margin: 5px;
     border-radius: 8px;
+    width: 100%;
+    max-width: 300px;
 }
 
 #start-container button {
@@ -39,6 +41,13 @@ h1, h2 {
     background-color: #007bff;
     color: white;
     border: none;
+}
+
+.secondary-btn {
+    background-color: #6c757d !important;
+}
+.secondary-btn:hover {
+    background-color: #5a6268 !important;
 }
 
 .category-display {
@@ -93,14 +102,12 @@ h1, h2 {
     min-height: 50px;
 }
 
-/* ▼▼▼ feedback内のテキストのスタイル ▼▼▼ */
 #feedback p {
     margin: 0;
     padding: 0;
     white-space: pre-wrap;
 }
 
-/* ▼▼▼ 次へ進むボタンのスタイル（新規追加） ▼▼▼ */
 .next-btn {
     display: block;
     width: 100%;
@@ -123,7 +130,8 @@ h1, h2 {
 
 
 #result-container p,
-#review-container > p {
+#review-container > p,
+#history-container > p {
     font-size: 1.2em;
 }
 
@@ -135,7 +143,7 @@ h1, h2 {
     margin-top: 25px;
 }
 
-.result-buttons button {
+.result-buttons button, #history-container button {
     margin: 0;
     padding: 12px 20px;
     font-size: 1em;
@@ -153,8 +161,8 @@ h1, h2 {
 #review-btn { background-color: #007bff; }
 #review-btn:hover { background-color: #0069d9; }
 
-#back-to-start-btn, #restart-btn { background-color: #28a745; }
-#back-to-start-btn:hover, #restart-btn:hover { background-color: #218838; }
+#back-to-start-btn, #restart-btn, #back-to-start-from-history-btn { background-color: #28a745; }
+#back-to-start-btn:hover, #restart-btn:hover, #back-to-start-from-history-btn:hover { background-color: #218838; }
 
 
 /* 解答一覧画面用のスタイル */
@@ -205,3 +213,42 @@ h1, h2 {
 }
 .mark.correct { color: #28a745; }
 .mark.incorrect { color: #dc3545; }
+
+/* 学習履歴画面用のスタイル */
+#history-list {
+    text-align: left;
+    max-height: 400px;
+    overflow-y: auto;
+    border: 1px solid #eee;
+    padding: 10px;
+    border-radius: 8px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.history-item {
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+}
+.history-item:last-child {
+    border-bottom: none;
+}
+
+.history-question {
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.history-stats {
+    display: flex;
+    gap: 20px;
+    margin-left: 15px;
+}
+
+.history-correct {
+    color: #28a745;
+}
+
+.history-incorrect {
+    color: #dc3545;
+}

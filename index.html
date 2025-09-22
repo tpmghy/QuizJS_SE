@@ -18,6 +18,7 @@
                 <option value="all">すべての問題</option>
             </select>
             <button id="start-btn">クイズ開始！</button>
+            <button id="history-btn" class="secondary-btn">学習履歴を見る</button>
         </div>
 
         <!-- クイズ本体（最初は非表示） -->
@@ -38,12 +39,10 @@
             <h2>クイズ結果</h2>
             <p>挑戦したカテゴリ: <span id="result-group-name"></span></p>
             <p>あなたの正解数は <span id="score">0</span> / <span id="total-questions">0</span> です。</p>
-            <!-- ▼▼▼ ボタンエリアから画像保存ボタンを削除 ▼▼▼ -->
             <div class="result-buttons">
                 <button id="review-btn">解答を振り返る</button>
                 <button id="back-to-start-btn">カテゴリ選択に戻る</button>
             </div>
-            <!-- ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲ -->
         </div>
 
         <!-- 解答一覧画面 -->
@@ -53,12 +52,20 @@
             <div id="review-list">
                 <!-- ここに解答一覧が動的に生成されます -->
             </div>
-            <!-- ▼▼▼ ボタンエリアに画像保存ボタンを追加 ▼▼▼ -->
             <div class="result-buttons">
                 <button id="save-review-image-btn">解答を画像で保存</button>
                 <button id="restart-btn">カテゴリ選択に戻る</button>
             </div>
-            <!-- ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲ -->
+        </div>
+
+        <!-- 学習履歴画面 -->
+        <div id="history-container" style="display: none;">
+            <h2>学習履歴</h2>
+            <p>これまでに解いた問題の正解・不正解の回数です。</p>
+            <div id="history-list">
+                <!-- ここに学習履歴が動的に生成されます -->
+            </div>
+            <button id="back-to-start-from-history-btn">カテゴリ選択に戻る</button>
         </div>
     </div>
     
