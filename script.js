@@ -105,7 +105,7 @@ function showQuestion() {
     currentGroupElement.textContent = `カテゴリ: ${currentGroupName}`;
     const currentQuestion = quizData[currentQuestionIndex];
     questionElement.textContent = `第${currentQuestionIndex + 1}問: ${currentQuestion.question}`;
-    feedbackElement.innerHTML = ''; // innerHTMLにすることで、ボタンも確実に消去
+    feedbackElement.innerHTML = '';
     feedbackElement.style.backgroundColor = 'transparent';
     
     choiceButtons.forEach((button, index) => {
@@ -132,9 +132,6 @@ function checkAnswer(selectedIndex) {
         isCorrect: isCorrect
     });
 
-    // ▼▼▼ ここからが大きな変更点 ▼▼▼
-
-    // フィードバックのテキスト部分を作成
     const feedbackText = document.createElement('p');
     if (isCorrect) {
         score++;
@@ -150,31 +147,24 @@ function checkAnswer(selectedIndex) {
         choiceButtons[currentQuestion.answerIndex].style.backgroundColor = '#d1e7dd';
     }
 
-    // まずテキストをフィードバックエリアに追加
-    feedbackElement.innerHTML = ''; // 中身を一旦空にする
+    feedbackElement.innerHTML = '';
     feedbackElement.appendChild(feedbackText);
 
-    // 「次に進む」ボタンを作成
     const nextButton = document.createElement('button');
     nextButton.className = 'next-btn';
 
-    // これが最後の問題かどうかを判定
     const isLastQuestion = currentQuestionIndex === quizData.length - 1;
     nextButton.textContent = isLastQuestion ? '結果を見る' : '次の問題へ';
 
-    // ボタンがクリックされた時の処理を定義
     nextButton.addEventListener('click', () => {
         if (isLastQuestion) {
-            showResult(); // 最後の問題なら結果表示
+            showResult();
         } else {
             currentQuestionIndex++;
-            showQuestion(); // そうでなければ次の問題へ
+            showQuestion();
         }
     });
-
-    // 作成したボタンをフィードバックエリアに追加
     feedbackElement.appendChild(nextButton);
-    // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
 }
 
 /**
@@ -219,6 +209,13 @@ function showReview() {
 async function saveReviewAsImage() {
     saveReviewImageButton.disabled = true;
     saveReviewImageButton.textContent = '画像生成中...';
+    
+    // ▼▼▼ ここからが変更点 ▼▼▼
+    // 画像生成の前に、一時的にスクロールを解除してリスト全体を表示させる
+    reviewList.style.maxHeight = 'none';
+    reviewList.style.overflowY = 'visible';
+    // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
+
     try {
         const canvas = await html2canvas(reviewContainer, {
             backgroundColor: '#ffffff',
@@ -228,19 +225,29 @@ async function saveReviewAsImage() {
             scrollY: -window.scrollY,
             scale: 2
         });
+
         const imageUrl = canvas.toDataURL('image/png');
         const downloadLink = document.createElement('a');
+        
         const date = new Date();
         const formattedDate = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
         downloadLink.download = `quiz_review_${formattedDate}.png`;
         downloadLink.href = imageUrl;
+
         document.body.appendChild(downloadLink);
         downloadLink.click();
         document.body.removeChild(downloadLink);
+
     } catch (error) {
         console.error('画像の生成に失敗しました:', error);
         alert('画像の保存に失敗しました。');
     } finally {
+        // ▼▼▼ ここからが変更点 ▼▼▼
+        // 処理が終わったら（成功・失敗にかかわらず）スタイルを元に戻す
+        reviewList.style.maxHeight = '400px';
+        reviewList.style.overflowY = 'auto';
+        // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
+
         saveReviewImageButton.disabled = false;
         saveReviewImageButton.textContent = '解答を画像で保存';
     }
@@ -255,6 +262,7 @@ function showStartScreen() {
     reviewContainer.style.display = 'none';
     startContainer.style.display = 'block';
 }
+
 
 /**
  * =================================================================
