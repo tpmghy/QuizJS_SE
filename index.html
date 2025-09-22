@@ -9,7 +9,19 @@
 <body>
     <div class="container">
         <h1>4択クイズゲーム</h1>
-        <div id="quiz-container">
+
+        <!-- スタート画面 -->
+        <div id="start-container">
+            <h2>挑戦するカテゴリを選んでください</h2>
+            <select id="group-select">
+                <option value="all">すべての問題</option>
+                <!-- ↑ この下にカテゴリが自動で追加されます -->
+            </select>
+            <button id="start-btn">クイズ開始！</button>
+        </div>
+
+        <!-- クイズ本体（最初は非表示） -->
+        <div id="quiz-container" style="display: none;">
             <p id="question"></p>
             <div id="choices" class="choices-grid">
                 <button class="choice-btn"></button>
@@ -19,13 +31,18 @@
             </div>
             <div id="feedback"></div>
         </div>
+
+        <!-- 結果表示（最初は非表示） -->
         <div id="result-container" style="display: none;">
             <h2>クイズ結果</h2>
             <p>あなたの正解数は <span id="score">0</span> / <span id="total-questions">0</span> です。</p>
-            <button id="retry-btn">もう一度挑戦する</button>
+            <button id="retry-btn">カテゴリ選択に戻る</button>
         </div>
     </div>
     
-    <script src="script.js"></script>   <!-- ← この行は元々あるもの -->
+    <!-- JavaScriptファイルを読み込み -->
+    <!-- Netlifyなどでビルドプロセスを使う場合は、config.jsは不要です -->
+    <!-- <script src="config.js"></script> --> 
+    <script src="script.js"></script>
 </body>
 </html>
