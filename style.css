@@ -1,15 +1,77 @@
+/* =================================================================
+ *  パスワード認証画面用のスタイル
+ * ================================================================= */
+.password-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #f0f2f5;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.password-box {
+    background-color: white;
+    padding: 30px 40px;
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+    text-align: center;
+    width: 90%;
+    max-width: 400px;
+}
+
+.password-box h2 {
+    color: #00529b;
+    margin-top: 0;
+    margin-bottom: 20px;
+}
+
+.password-box input {
+    width: 100%;
+    padding: 12px;
+    font-size: 1.1em;
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    box-sizing: border-box;
+}
+
+.password-box button {
+    width: 100%;
+    padding: 12px;
+    font-size: 1.1em;
+    color: white;
+    background-color: #007bff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.password-box button:hover {
+    background-color: #0069d9;
+}
+
+.error-message {
+    color: #dc3545;
+    margin-top: 15px;
+    height: 1.2em; /* エラーメッセージが表示されてもレイアウトが崩れないように高さを確保 */
+}
+
+
+/* =================================================================
+ *  基本レイアウトとメインコンテナ
+ * ================================================================= */
 body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     background-color: #f0f2f5;
     color: #333;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
     margin: 0;
-    padding: 10px;
-    box-sizing: border-box;
 }
+
 .container {
     background-color: white;
     padding: 25px 40px;
@@ -18,17 +80,28 @@ body {
     width: 100%;
     max-width: 650px;
     text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    box-sizing: border-box;
 }
+
 h1, h2 {
     color: #00529b;
     margin-top: 0;
     margin-bottom: 25px;
 }
 
-/* ▼▼▼ スタート画面のカテゴリ選択UIのスタイル ▼▼▼ */
+/* =================================================================
+ *  スタート画面
+ * ================================================================= */
 .category-selector {
     margin: 10px 0;
     text-align: left;
+    width: 100%;
+    max-width: 400px;
 }
 .category-selector label {
     display: block;
@@ -60,8 +133,10 @@ h1, h2 {
 .secondary-btn:hover {
     background-color: #5a6268 !important;
 }
-/* ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲ */
 
+/* =================================================================
+ *  クイズ画面
+ * ================================================================= */
 .category-display {
     font-size: 0.9em;
     color: #6c757d;
@@ -130,9 +205,16 @@ h1, h2 {
 .next-btn:hover {
     background-color: #0069d9;
 }
-#result-container p, #review-container > p, #history-container > p {
+
+/* =================================================================
+ *  結果・振り返り・履歴画面の共通スタイル
+ * ================================================================= */
+#result-container p,
+#review-container > p,
+#history-container > p {
     font-size: 1.2em;
 }
+
 .result-buttons {
     display: flex;
     flex-wrap: wrap;
@@ -140,6 +222,7 @@ h1, h2 {
     gap: 10px;
     margin-top: 25px;
 }
+
 .result-buttons button, #history-container button {
     margin: 0;
     padding: 12px 20px;
@@ -150,13 +233,20 @@ h1, h2 {
     cursor: pointer;
     transition: background-color 0.2s;
 }
+
 #save-review-image-btn { background-color: #ffc107; color: #212529; }
 #save-review-image-btn:hover { background-color: #e0a800; }
 #save-review-image-btn:disabled { background-color: #e9ecef; color: #6c757d; cursor: wait; }
+
 #review-btn { background-color: #007bff; }
 #review-btn:hover { background-color: #0069d9; }
+
 #back-to-start-btn, #restart-btn, #back-to-start-from-history-btn { background-color: #28a745; }
 #back-to-start-btn:hover, #restart-btn:hover, #back-to-start-from-history-btn:hover { background-color: #218838; }
+
+/* =================================================================
+ *  解答一覧画面・学習履歴画面のリストスタイル
+ * ================================================================= */
 #review-list, #history-list {
     text-align: left;
     max-height: 400px;
@@ -199,10 +289,15 @@ h1, h2 {
 }
 .mark.correct { color: #28a745; }
 .mark.incorrect { color: #dc3545; }
+
 .history-stats {
     display: flex;
     gap: 20px;
     margin-left: 15px;
 }
-.history-correct { color: #28a745; }
-.history-incorrect { color: #dc3545; }
+.history-correct {
+    color: #28a745;
+}
+.history-incorrect {
+    color: #dc3545;
+}

@@ -3,9 +3,53 @@ const API_URL = '__API_URL__';
 const SECRET_KEY = '__SECRET_KEY__';
 // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
 
+
 /**
  * =================================================================
- *  HTML要素の取得
+ *  パスワード認証
+ * =================================================================
+ */
+// ▼▼▼ 正しいパスワードをここに設定してください ▼▼▼
+const CORRECT_PASSWORD = '2025'; 
+// ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
+
+const passwordContainer = document.getElementById('password-container');
+const passwordInput = document.getElementById('password-input');
+const passwordSubmitBtn = document.getElementById('password-submit-btn');
+const passwordError = document.getElementById('password-error');
+const quizAppContainer = document.getElementById('quiz-app-container');
+
+function checkPassword() {
+    const enteredPassword = passwordInput.value;
+    if (enteredPassword === CORRECT_PASSWORD) {
+        // パスワードが正しければ、認証画面を非表示にし、クイズアプリを表示
+        passwordContainer.style.display = 'none';
+        quizAppContainer.style.display = 'flex'; // .containerはflexboxなのでflexを指定
+        
+        // クイズアプリの初期化処理を実行
+        initializePage();
+    } else {
+        // パスワードが間違っていれば、エラーメッセージを表示
+        passwordError.textContent = 'パスワードが違います。';
+        passwordInput.value = ''; // 入力欄をクリア
+        passwordInput.focus(); // 再度入力欄にフォーカス
+    }
+}
+
+// 認証ボタンがクリックされた時の処理
+passwordSubmitBtn.addEventListener('click', checkPassword);
+
+// パスワード入力欄でEnterキーが押された時の処理
+passwordInput.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
+        checkPassword();
+    }
+});
+
+
+/**
+ * =================================================================
+ *  HTML要素の取得 (クイズアプリ本体)
  * =================================================================
  */
 // --- スタート画面 ---
@@ -18,23 +62,29 @@ const smallCategorySelect = document.getElementById('group-small-select');
 const mediumCategoryWrapper = document.getElementById('medium-category-wrapper');
 const smallCategoryWrapper = document.getElementById('small-category-wrapper');
 
-// (以降の要素取得は変更なし)
+// --- クイズ画面 ---
 const quizContainer = document.getElementById('quiz-container');
 const questionElement = document.getElementById('question');
 const choiceButtons = document.querySelectorAll('.choice-btn');
 const feedbackElement = document.getElementById('feedback');
 const currentGroupElement = document.getElementById('current-group');
+
+// --- 結果画面 ---
 const resultContainer = document.getElementById('result-container');
 const scoreElement = document.getElementById('score');
 const totalQuestionsElement = document.getElementById('total-questions');
 const resultGroupNameElement = document.getElementById('result-group-name');
 const reviewButton = document.getElementById('review-btn');
 const backToStartButton = document.getElementById('back-to-start-btn');
+
+// --- 解答一覧画面 ---
 const reviewContainer = document.getElementById('review-container');
 const reviewList = document.getElementById('review-list');
 const restartButton = document.getElementById('restart-btn');
 const reviewGroupNameElement = document.getElementById('review-group-name');
 const saveReviewImageButton = document.getElementById('save-review-image-btn');
+
+// --- 学習履歴画面 ---
 const historyContainer = document.getElementById('history-container');
 const historyList = document.getElementById('history-list');
 const backToStartFromHistoryButton = document.getElementById('back-to-start-from-history-btn');
@@ -85,7 +135,9 @@ async function fetchQuizData(params) {
     }
 }
 
-// (startQuiz, showQuestion, checkAnswer, showResult, showReview, saveReviewAsImage, showHistory, showStartScreen は前回のコードから変更なし)
+/**
+ * クイズの初期化と開始を行う関数
+ */
 function startQuiz() {
     currentQuestionIndex = 0;
     score = 0;
@@ -97,6 +149,10 @@ function startQuiz() {
     quizContainer.style.display = 'block';
     showQuestion();
 }
+
+/**
+ * 現在の問題と選択肢を画面に表示する関数
+ */
 function showQuestion() {
     currentGroupElement.textContent = `カテゴリ: ${currentGroupName}`;
     const currentQuestion = quizData[currentQuestionIndex];
@@ -111,6 +167,10 @@ function showQuestion() {
         button.style.borderColor = '#ddd';
     });
 }
+
+/**
+ * ユーザーの回答を判定し、次の問題へ進むボタンを表示する関数
+ */
 function checkAnswer(selectedIndex) {
     choiceButtons.forEach(button => button.disabled = true);
     const currentQuestion = quizData[currentQuestionIndex];
@@ -159,6 +219,10 @@ function checkAnswer(selectedIndex) {
     });
     feedbackElement.appendChild(nextButton);
 }
+
+/**
+ * 最終的なクイズの結果を画面に表示する関数
+ */
 function showResult() {
     quizContainer.style.display = 'none';
     resultContainer.style.display = 'block';
@@ -166,6 +230,10 @@ function showResult() {
     scoreElement.textContent = score;
     totalQuestionsElement.textContent = quizData.length;
 }
+
+/**
+ * 解答一覧を生成して表示する関数
+ */
 function showReview() {
     resultContainer.style.display = 'none';
     reviewContainer.style.display = 'block';
@@ -181,6 +249,10 @@ function showReview() {
         reviewList.appendChild(reviewItem);
     });
 }
+
+/**
+ * 解答一覧画面を画像として保存する関数
+ */
 async function saveReviewAsImage() {
     saveReviewImageButton.disabled = true;
     saveReviewImageButton.textContent = '画像生成中...';
@@ -205,6 +277,10 @@ async function saveReviewAsImage() {
         saveReviewImageButton.textContent = '解答を画像で保存';
     }
 }
+
+/**
+ * 学習履歴を生成して表示する関数
+ */
 function showHistory() {
     startContainer.style.display = 'none';
     historyContainer.style.display = 'block';
@@ -221,6 +297,10 @@ function showHistory() {
         historyList.appendChild(historyItem);
     });
 }
+
+/**
+ * スタート画面（カテゴリ選択画面）に戻る関数
+ */
 function showStartScreen() {
     resultContainer.style.display = 'none';
     quizContainer.style.display = 'none';
@@ -232,7 +312,7 @@ function showStartScreen() {
 
 /**
  * =================================================================
- *  イベントリスナーの設定
+ *  イベントリスナーの設定 (クイズアプリ本体)
  * =================================================================
  */
 startButton.addEventListener('click', () => {
@@ -250,12 +330,14 @@ startButton.addEventListener('click', () => {
     currentGroupName = nameParts.length > 0 ? nameParts.join(' > ') : 'すべての問題';
     fetchQuizData(params);
 });
+
 reviewButton.addEventListener('click', showReview);
 backToStartButton.addEventListener('click', showStartScreen);
 saveReviewImageButton.addEventListener('click', saveReviewAsImage);
 restartButton.addEventListener('click', showStartScreen);
 historyButton.addEventListener('click', showHistory);
 backToStartFromHistoryButton.addEventListener('click', showStartScreen);
+
 largeCategorySelect.addEventListener('change', (e) => {
     const selectedLarge = e.target.value;
     mediumCategorySelect.innerHTML = '';
@@ -270,6 +352,7 @@ largeCategorySelect.addEventListener('change', (e) => {
         mediumCategoryWrapper.style.display = 'block';
     }
 });
+
 mediumCategorySelect.addEventListener('change', (e) => {
     const selectedLarge = largeCategorySelect.value;
     const selectedMedium = e.target.value;
@@ -290,8 +373,6 @@ mediumCategorySelect.addEventListener('change', (e) => {
  *  初期化処理
  * =================================================================
  */
-
-// ▼▼▼ 変更点: カテゴリ選択画面を初期化する部分を別の関数に分離 ▼▼▼
 async function initializeCategorySelector() {
     largeCategorySelect.disabled = true;
     startButton.disabled = true;
@@ -320,25 +401,21 @@ async function initializeCategorySelector() {
     }
 }
 
-// ▼▼▼ 変更点: ページ読み込み時のメイン処理を新設 ▼▼▼
 function initializePage() {
-    // 現在のURLからクエリパラメータを読み取る
     const params = new URLSearchParams(window.location.search);
     const large = params.get('large');
     const medium = params.get('medium');
     const small = params.get('small');
 
-    // もし必須のパラメータ(large, medium, small)が全て揃っていたら
     if (large && medium && small) {
-        // スタート画面を隠して、直接クイズを開始する
         startContainer.style.display = 'none';
         currentGroupName = `${large} > ${medium} > ${small}`;
         fetchQuizData({ large, medium, small });
     } else {
-        // パラメータがなければ、通常通りカテゴリ選択画面を初期化する
         initializeCategorySelector();
     }
 }
 
-// ページの読み込みが始まったら、この初期化処理を一番最初に実行する
-initializePage();
+// ページ読み込み時のメイン処理は、パスワード認証が成功した後に呼び出されるため、
+// ここでの自動実行は不要です。
+// initializePage();

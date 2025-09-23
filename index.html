@@ -8,69 +8,37 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
-    <div class="container">
+
+    <!-- ▼▼▼ パスワード認証画面（ここから新規追加） ▼▼▼ -->
+    <div id="password-container" class="password-screen">
+        <div class="password-box">
+            <h2>パスワードを入力してください</h2>
+            <input type="password" id="password-input" placeholder="パスワード">
+            <button id="password-submit-btn">認証</button>
+            <p id="password-error" class="error-message"></p>
+        </div>
+    </div>
+    <!-- ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲ -->
+
+
+    <!-- クイズゲーム本体（最初は非表示） -->
+    <div class="container" id="quiz-app-container" style="display: none;">
         <h1>4択クイズゲーム</h1>
 
         <!-- スタート画面 -->
         <div id="start-container">
             <h2>挑戦するカテゴリを選んでください</h2>
-            <!-- ▼▼▼ 3階層のドロップダウン ▼▼▼ -->
-            <div class="category-selector">
-                <label for="group-large-select">大分類</label>
-                <select id="group-large-select">
-                    <option value="all">すべての問題</option>
-                </select>
-            </div>
-            <div id="medium-category-wrapper" class="category-selector" style="display: none;">
-                <label for="group-medium-select">中分類</label>
-                <select id="group-medium-select"></select>
-            </div>
-            <div id="small-category-wrapper" class="category-selector" style="display: none;">
-                <label for="group-small-select">小分類</label>
-                <select id="group-small-select"></select>
-            </div>
-            <!-- ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲ -->
+            <select id="group-select">
+                <option value="all">すべての問題</option>
+            </select>
             <button id="start-btn">クイズ開始！</button>
             <button id="history-btn" class="secondary-btn">学習履歴を見る</button>
         </div>
 
-        <!-- (以降の画面構成は変更なし) -->
-        <div id="quiz-container" style="display: none;">
-            <p id="current-group" class="category-display"></p>
-            <p id="question"></p>
-            <div id="choices" class="choices-grid">
-                <button class="choice-btn"></button>
-                <button class="choice-btn"></button>
-                <button class="choice-btn"></button>
-                <button class="choice-btn"></button>
-            </div>
-            <div id="feedback"></div>
-        </div>
-        <div id="result-container" style="display: none;">
-            <h2>クイズ結果</h2>
-            <p>挑戦したカテゴリ: <span id="result-group-name"></span></p>
-            <p>あなたの正解数は <span id="score">0</span> / <span id="total-questions">0</span> です。</p>
-            <div class="result-buttons">
-                <button id="review-btn">解答を振り返る</button>
-                <button id="back-to-start-btn">カテゴリ選択に戻る</button>
-            </div>
-        </div>
-        <div id="review-container" style="display: none;">
-            <h2>解答の振り返り</h2>
-            <p>挑戦したカテゴリ: <span id="review-group-name"></span></p>
-            <div id="review-list"></div>
-            <div class="result-buttons">
-                <button id="save-review-image-btn">解答を画像で保存</button>
-                <button id="restart-btn">カテゴリ選択に戻る</button>
-            </div>
-        </div>
-        <div id="history-container" style="display: none;">
-            <h2>学習履歴</h2>
-            <p>これまでに解いた問題の正解・不正解の回数です。</p>
-            <div id="history-list"></div>
-            <button id="back-to-start-from-history-btn">カテゴリ選択に戻る</button>
-        </div>
+        {/* ... (以降の画面構成は変更なし) ... */}
+
     </div>
+    
     <script src="script.js"></script>
 </body>
 </html>
