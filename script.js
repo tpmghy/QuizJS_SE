@@ -280,14 +280,21 @@ function showStartScreen() {
     youtubePlayer.src = '';
     showDashboard();
 }
+
+// ▼▼▼ 修正対象の関数 ▼▼▼
 function handleStartFromDashboard(largeCode, mediumCode, smallCode) {
+    // 最初に必要な変数をすべて宣言する
     const largeCat = categoryTree[largeCode];
     const mediumCat = largeCat.children[mediumCode];
-    const smallCat = smallCat.children[smallCode];
+    const smallCat = mediumCat.children[smallCode]; // ここで宣言
+    
+    // 宣言した変数を使って、カテゴリ名を組み立てる
     currentGroupName = `${largeCat.name} > ${mediumCat.name} > ${smallCat.name}`;
     const videoId = smallCat.videoId;
     const params = { l: largeCode, m: mediumCode, s: smallCode };
+
     document.body.dataset.currentSmallCode = smallCode;
+
     startContainer.style.display = 'none';
     if (videoId) {
         showVideoScreen(videoId, params);
@@ -296,6 +303,8 @@ function handleStartFromDashboard(largeCode, mediumCode, smallCode) {
         fetchQuizData(params);
     }
 }
+// ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
+
 function showVideoScreen(videoId, quizParams) {
     videoTitle.textContent = `学習動画: ${currentGroupName}`;
     youtubePlayer.src = `https://www.youtube.com/embed/${videoId}`;
@@ -341,9 +350,7 @@ function showDashboard() {
                 const startButton = document.createElement('button');
                 startButton.className = 'dashboard-start-btn';
                 startButton.textContent = '開始';
-                // ▼▼▼ 修正点: onclickではなく、addEventListenerを使用する ▼▼▼
                 startButton.addEventListener('click', () => handleStartFromDashboard(largeCode, mediumCode, smallCode));
-                // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
                 item.appendChild(startButton);
                 dashboardList.appendChild(item);
             }
@@ -359,7 +366,6 @@ function showDashboard() {
  *  イベントリスナーの設定
  * =================================================================
  */
-// ダッシュボードから開始するため、古いstartButtonのリスナーは不要
 reviewButton.addEventListener('click', showReview);
 backToStartButton.addEventListener('click', showStartScreen);
 saveReviewImageButton.addEventListener('click', saveReviewAsImage);
