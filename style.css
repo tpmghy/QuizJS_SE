@@ -149,17 +149,37 @@ h1, h2 {
     color: #28a745;
     font-weight: bold;
 }
-.dashboard-start-btn {
-    padding: 8px 20px;
-    font-size: 1em;
+.dashboard-buttons {
+    display: flex;
+    gap: 8px;
+}
+.dashboard-watch-btn, .dashboard-quiz-btn {
+    padding: 8px 16px;
+    font-size: 0.9em;
+    font-weight: bold;
     border-radius: 8px;
     cursor: pointer;
-    background-color: #007bff;
-    color: white;
     border: none;
     transition: background-color 0.2s;
+    min-width: 70px;
 }
-.dashboard-start-btn:hover {
+.dashboard-watch-btn {
+    background-color: #ffc107;
+    color: #212529;
+}
+.dashboard-watch-btn:hover:not(:disabled) {
+    background-color: #e0a800;
+}
+.dashboard-watch-btn:disabled {
+    background-color: #e9ecef;
+    color: #adb5bd;
+    cursor: not-allowed;
+}
+.dashboard-quiz-btn {
+    background-color: #007bff;
+    color: white;
+}
+.dashboard-quiz-btn:hover {
     background-color: #0069d9;
 }
 .start-menu-buttons {

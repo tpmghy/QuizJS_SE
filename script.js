@@ -42,6 +42,7 @@ const quizContainer = document.getElementById('quiz-container');
 const resultContainer = document.getElementById('result-container');
 const reviewContainer = document.getElementById('review-container');
 const historyContainer = document.getElementById('history-container');
+const progressContainer = document.getElementById('progress-container');
 // --- スタート画面 ---
 const historyButton = document.getElementById('history-btn');
 const dashboardList = document.getElementById('dashboard-list');
@@ -142,6 +143,7 @@ function startQuiz() {
     resultContainer.style.display = 'none';
     reviewContainer.style.display = 'none';
     historyContainer.style.display = 'none';
+    progressContainer.style.display = 'none';
     quizContainer.style.display = 'block';
     showQuestion();
 }
@@ -277,34 +279,26 @@ function showStartScreen() {
     resultContainer.style.display = 'none';
     reviewContainer.style.display = 'none';
     historyContainer.style.display = 'none';
+    progressContainer.style.display = 'none';
     youtubePlayer.src = '';
     showDashboard();
 }
-
-// ▼▼▼ 修正対象の関数 ▼▼▼
-function handleStartFromDashboard(largeCode, mediumCode, smallCode) {
-    // 最初に必要な変数をすべて宣言する
+function handleStartFromDashboard(largeCode, mediumCode, smallCode, actionType) {
     const largeCat = categoryTree[largeCode];
     const mediumCat = largeCat.children[mediumCode];
-    const smallCat = mediumCat.children[smallCode]; // ここで宣言
-    
-    // 宣言した変数を使って、カテゴリ名を組み立てる
+    const smallCat = smallCat.children[smallCode];
     currentGroupName = `${largeCat.name} > ${mediumCat.name} > ${smallCat.name}`;
     const videoId = smallCat.videoId;
     const params = { l: largeCode, m: mediumCode, s: smallCode };
-
     document.body.dataset.currentSmallCode = smallCode;
-
     startContainer.style.display = 'none';
-    if (videoId) {
+    if (actionType === 'watch' && videoId) {
         showVideoScreen(videoId, params);
         updateProgressData(smallCode, { video: true });
     } else {
         fetchQuizData(params);
     }
 }
-// ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
-
 function showVideoScreen(videoId, quizParams) {
     videoTitle.textContent = `学習動画: ${currentGroupName}`;
     youtubePlayer.src = `https://www.youtube.com/embed/${videoId}`;
@@ -347,11 +341,22 @@ function showDashboard() {
                         <span class="score ${scoreClass}">クイズ: ${scoreText}</span>
                     </div>
                 `;
-                const startButton = document.createElement('button');
-                startButton.className = 'dashboard-start-btn';
-                startButton.textContent = '開始';
-                startButton.addEventListener('click', () => handleStartFromDashboard(largeCode, mediumCode, smallCode));
-                item.appendChild(startButton);
+                const buttonContainer = document.createElement('div');
+                buttonContainer.className = 'dashboard-buttons';
+                const watchButton = document.createElement('button');
+                watchButton.className = 'dashboard-watch-btn';
+                watchButton.textContent = '動画';
+                if (!smallCat.videoId) {
+                    watchButton.disabled = true;
+                }
+                watchButton.addEventListener('click', () => handleStartFromDashboard(largeCode, mediumCode, smallCode, 'watch'));
+                const quizButton = document.createElement('button');
+                quizButton.className = 'dashboard-quiz-btn';
+                quizButton.textContent = 'クイズ';
+                quizButton.addEventListener('click', () => handleStartFromDashboard(largeCode, mediumCode, smallCode, 'quiz'));
+                buttonContainer.appendChild(watchButton);
+                buttonContainer.appendChild(quizButton);
+                item.appendChild(buttonContainer);
                 dashboardList.appendChild(item);
             }
         }
@@ -392,7 +397,7 @@ async function initializePage() {
         categoryTree = await response.json();
         if (l && m && s && categoryTree[l]?.children[m]?.children[s]) {
             startContainer.style.display = 'none';
-            handleStartFromDashboard(l, m, s);
+            handleStartFromDashboard(l, m, s, 'quiz');
         } else {
             showDashboard();
         }
