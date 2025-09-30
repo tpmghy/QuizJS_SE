@@ -283,14 +283,20 @@ function showStartScreen() {
     youtubePlayer.src = '';
     showDashboard();
 }
+// ▼▼▼ 修正対象の関数 ▼▼▼
 function handleStartFromDashboard(largeCode, mediumCode, smallCode, actionType) {
+    // 最初に必要な変数をすべて宣言する
     const largeCat = categoryTree[largeCode];
     const mediumCat = largeCat.children[mediumCode];
-    const smallCat = smallCat.children[smallCode];
+    const smallCat = mediumCat.children[smallCode];
+    
+    // 宣言した変数を使って、カテゴリ名を組み立てる
     currentGroupName = `${largeCat.name} > ${mediumCat.name} > ${smallCat.name}`;
     const videoId = smallCat.videoId;
     const params = { l: largeCode, m: mediumCode, s: smallCode };
+
     document.body.dataset.currentSmallCode = smallCode;
+
     startContainer.style.display = 'none';
     if (actionType === 'watch' && videoId) {
         showVideoScreen(videoId, params);
@@ -299,6 +305,7 @@ function handleStartFromDashboard(largeCode, mediumCode, smallCode, actionType) 
         fetchQuizData(params);
     }
 }
+// ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
 function showVideoScreen(videoId, quizParams) {
     videoTitle.textContent = `学習動画: ${currentGroupName}`;
     youtubePlayer.src = `https://www.youtube.com/embed/${videoId}`;
