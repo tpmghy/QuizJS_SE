@@ -1,19 +1,8 @@
-# 秘密鍵や環境変数を定義するファイル
-config.js
-.env
-
-# Node.jsの依存関係フォルダ
-# (npm install を実行すると生成される)
-node_modules/
+# ビルド成果物フォルダを無視する
+public/
 
 # macOSのシステムファイル
 .DS_Store
 
-# Visual Studio Codeのエディタ設定フォルダ
+# VS Codeの設定フォルダ
 .vscode/
-
-# ログファイル
-*.log
-
-# 一時ファイル
-*.tmp
