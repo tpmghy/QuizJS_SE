@@ -23,50 +23,29 @@
     <div class="container" id="quiz-app-container" style="display: none;">
         <h1>4択クイズゲーム</h1>
 
-        <!-- スタート画面 -->
+        <!-- スタート画面 (学習ダッシュボード) -->
         <div id="start-container">
-            <h2>挑戦するカテゴリを選んでください</h2>
-            <div class="category-selector">
-                <label for="group-large-select">大分類</label>
-                <select id="group-large-select">
-                    <option value="all">すべての問題</option>
-                </select>
-            </div>
-            <div id="medium-category-wrapper" class="category-selector" style="display: none;">
-                <label for="group-medium-select">中分類</label>
-                <select id="group-medium-select"></select>
-            </div>
-            <div id="small-category-wrapper" class="category-selector" style="display: none;">
-                <label for="group-small-select">小分類</label>
-                <select id="group-small-select"></select>
-            </div>
-            <button id="start-btn">学習・クイズ開始！</button>
-            <!-- ▼▼▼ ボタンを2つ並べるためのコンテナを追加 ▼▼▼ -->
+            <h2>学習ダッシュボード</h2>
+            <p>挑戦したい単元の「開始」ボタンを押してください。</p>
+            <!-- ▼▼▼ ここにダッシュボードが動的に生成されます ▼▼▼ -->
+            <div id="dashboard-list"></div>
+            <!-- ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲ -->
             <div class="start-menu-buttons">
-                <button id="progress-btn" class="secondary-btn">進捗を見る</button>
-                <button id="history-btn" class="secondary-btn">学習履歴を見る</button>
+                <button id="history-btn" class="secondary-btn">全問題の学習履歴</button>
             </div>
         </div>
         
-        <!-- ▼▼▼ 進捗管理画面（ここから新規追加） ▼▼▼ -->
-        <div id="progress-container" style="display: none;">
-            <h2>進捗状況</h2>
-            <p>単元ごとの学習状況です。</p>
-            <div id="progress-list">
-                <!-- ここに進捗一覧が動的に生成されます -->
-            </div>
-            <button id="back-to-start-from-progress-btn">カテゴリ選択に戻る</button>
-        </div>
-        <!-- ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲ -->
-
         <!-- (以降の画面構成は変更なし) -->
+        <div id="progress-container" style="display: none;">
+            <!-- この画面は現在使われていませんが、将来のために残しておいても良いでしょう -->
+        </div>
         <div id="video-container" style="display: none;">
             <h2 id="video-title"></h2>
             <div class="video-wrapper">
                 <iframe id="youtube-player" width="560" height="315" src="" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
             </div>
             <button id="proceed-to-quiz-btn">クイズに進む</button>
-            <button id="back-to-start-from-video-btn" class="secondary-btn">カテゴリ選択に戻る</button>
+            <button id="back-to-start-from-video-btn" class="secondary-btn">ダッシュボードに戻る</button>
         </div>
         <div id="quiz-container" style="display: none;">
             <p id="current-group" class="category-display"></p>
@@ -85,7 +64,7 @@
             <p>あなたの正解数は <span id="score">0</span> / <span id="total-questions">0</span> です。</p>
             <div class="result-buttons">
                 <button id="review-btn">解答を振り返る</button>
-                <button id="back-to-start-btn">カテゴリ選択に戻る</button>
+                <button id="back-to-start-btn">ダッシュボードに戻る</button>
             </div>
         </div>
         <div id="review-container" style="display: none;">
@@ -94,14 +73,14 @@
             <div id="review-list"></div>
             <div class="result-buttons">
                 <button id="save-review-image-btn">解答を画像で保存</button>
-                <button id="restart-btn">カテゴリ選択に戻る</button>
+                <button id="restart-btn">ダッシュボードに戻る</button>
             </div>
         </div>
         <div id="history-container" style="display: none;">
-            <h2>学習履歴</h2>
+            <h2>全問題の学習履歴</h2>
             <p>これまでに解いた問題の正解・不正解の回数です。</p>
             <div id="history-list"></div>
-            <button id="back-to-start-from-history-btn">カテゴリ選択に戻る</button>
+            <button id="back-to-start-from-history-btn">ダッシュボードに戻る</button>
         </div>
     </div>
     

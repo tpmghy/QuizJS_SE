@@ -4,9 +4,9 @@ const SECRET_KEY = '__SECRET_KEY__';
 // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
 
 /**
- * =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+ * =================================================================
  *  パスワード認証
- * =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+ * =================================================================
  */
 const CORRECT_PASSWORD = 'your_password_here'; 
 const passwordContainer = document.getElementById('password-container');
@@ -37,18 +37,8 @@ passwordInput.addEventListener('keydown', (event) => {
  */
 // --- スタート画面 ---
 const startContainer = document.getElementById('start-container');
-const startButton = document.getElementById('start-btn');
 const historyButton = document.getElementById('history-btn');
-const largeCategorySelect = document.getElementById('group-large-select');
-const mediumCategorySelect = document.getElementById('group-medium-select');
-const smallCategorySelect = document.getElementById('group-small-select');
-const mediumCategoryWrapper = document.getElementById('medium-category-wrapper');
-const smallCategoryWrapper = document.getElementById('small-category-wrapper');
-const progressButton = document.getElementById('progress-btn');
-// --- 進捗管理画面 ---
-const progressContainer = document.getElementById('progress-container');
-const progressList = document.getElementById('progress-list');
-const backToStartFromProgressButton = document.getElementById('back-to-start-from-progress-btn');
+const dashboardList = document.getElementById('dashboard-list');
 // --- 動画学習画面 ---
 const videoContainer = document.getElementById('video-container');
 const videoTitle = document.getElementById('video-title');
@@ -153,7 +143,6 @@ function startQuiz() {
     resultContainer.style.display = 'none';
     reviewContainer.style.display = 'none';
     historyContainer.style.display = 'none';
-    progressContainer.style.display = 'none';
     quizContainer.style.display = 'block';
     showQuestion();
 }
@@ -224,7 +213,7 @@ function showResult() {
     resultGroupNameElement.textContent = currentGroupName;
     scoreElement.textContent = score;
     totalQuestionsElement.textContent = quizData.length;
-    const smallCode = smallCategorySelect.value;
+    const smallCode = document.body.dataset.currentSmallCode;
     updateProgressData(smallCode, { score: score, total: quizData.length });
 }
 function showReview() {
@@ -289,30 +278,17 @@ function showStartScreen() {
     resultContainer.style.display = 'none';
     reviewContainer.style.display = 'none';
     historyContainer.style.display = 'none';
-    progressContainer.style.display = 'none';
     youtubePlayer.src = '';
+    showDashboard();
 }
-function handleStartButtonClick() {
-    const largeCode = largeCategorySelect.value;
-    const mediumCode = mediumCategorySelect.value;
-    const smallCode = smallCategorySelect.value;
-    let nameParts = [];
-    let videoId = null;
-    if (largeCode && largeCode !== 'all') {
-        nameParts.push(categoryTree[largeCode].name);
-        if (mediumCode && mediumCode !== 'all') {
-            nameParts.push(categoryTree[largeCode].children[mediumCode].name);
-            if (smallCode && smallCode !== 'all') {
-                const smallCatData = categoryTree[largeCode].children[mediumCode].children[smallCode];
-                nameParts.push(smallCatData.name);
-                videoId = smallCatData.videoId;
-            }
-        }
-    }
-    currentGroupName = nameParts.length > 0 ? nameParts.join(' > ') : 'すべての問題';
-    const params = { l: largeCode };
-    if (mediumCode && mediumCode !== 'all') params.m = mediumCode;
-    if (smallCode && smallCode !== 'all') params.s = smallCode;
+function handleStartFromDashboard(largeCode, mediumCode, smallCode) {
+    const largeCat = categoryTree[largeCode];
+    const mediumCat = largeCat.children[mediumCode];
+    const smallCat = smallCat.children[smallCode];
+    currentGroupName = `${largeCat.name} > ${mediumCat.name} > ${smallCat.name}`;
+    const videoId = smallCat.videoId;
+    const params = { l: largeCode, m: mediumCode, s: smallCode };
+    document.body.dataset.currentSmallCode = smallCode;
     startContainer.style.display = 'none';
     if (videoId) {
         showVideoScreen(videoId, params);
@@ -333,40 +309,47 @@ function showVideoScreen(videoId, quizParams) {
         fetchQuizData(quizParams);
     });
 }
-function showProgress() {
-    startContainer.style.display = 'none';
-    progressContainer.style.display = 'block';
-    progressList.innerHTML = '';
+function showDashboard() {
+    dashboardList.innerHTML = '';
     const progressData = getProgressData();
+    let hasContent = false;
     for (const largeCode in categoryTree) {
         const largeCat = categoryTree[largeCode];
         const largeHeader = document.createElement('h3');
-        largeHeader.className = 'progress-large-cat';
+        largeHeader.className = 'dashboard-large-cat';
         largeHeader.textContent = largeCat.name;
-        progressList.appendChild(largeHeader);
+        dashboardList.appendChild(largeHeader);
         for (const mediumCode in largeCat.children) {
             const mediumCat = largeCat.children[mediumCode];
-            const mediumHeader = document.createElement('h4');
-            mediumHeader.className = 'progress-medium-cat';
-            mediumHeader.textContent = mediumCat.name;
-            progressList.appendChild(mediumHeader);
             for (const smallCode in mediumCat.children) {
+                hasContent = true;
                 const smallCat = mediumCat.children[smallCode];
                 const record = progressData[smallCode] || { videoViews: 0, correct: 0, total: 0 };
-                const progressItem = document.createElement('div');
-                progressItem.className = 'progress-item';
+                const item = document.createElement('div');
+                item.className = 'dashboard-item';
                 const scoreText = record.total > 0 ? `${record.correct} / ${record.total}` : '未挑戦';
                 const scoreClass = record.total > 0 && record.correct === record.total ? 'perfect' : '';
-                progressItem.innerHTML = `
-                    <p class="progress-small-cat">${smallCat.name}</p>
-                    <div class="progress-stats">
-                        <span class="progress-video-views">視聴回数: ${record.videoViews}</span>
-                        <span class="progress-score ${scoreClass}">クイズ: ${scoreText}</span>
+                item.innerHTML = `
+                    <div class="dashboard-cat-name">
+                        <span class="medium-cat">${mediumCat.name}</span>
+                        <span class="small-cat">${smallCat.name}</span>
+                    </div>
+                    <div class="dashboard-progress">
+                        <span>視聴: ${record.videoViews}回</span>
+                        <span class="score ${scoreClass}">クイズ: ${scoreText}</span>
                     </div>
                 `;
-                progressList.appendChild(progressItem);
+                const startButton = document.createElement('button');
+                startButton.className = 'dashboard-start-btn';
+                startButton.textContent = '開始';
+                startButton.onclick = () => handleStartFromDashboard(largeCode, mediumCode, smallCode);
+                item.appendChild(startButton);
+                dashboardList.appendChild(item);
             }
         }
+    }
+    if (!hasContent) {
+        dashboardList.innerHTML = '<p>表示できるカテゴリがありません。</p>';
     }
 }
 
@@ -375,7 +358,6 @@ function showProgress() {
  *  イベントリスナーの設定
  * =================================================================
  */
-startButton.addEventListener('click', handleStartButtonClick);
 reviewButton.addEventListener('click', showReview);
 backToStartButton.addEventListener('click', showStartScreen);
 saveReviewImageButton.addEventListener('click', saveReviewAsImage);
@@ -383,93 +365,32 @@ restartButton.addEventListener('click', showStartScreen);
 historyButton.addEventListener('click', showHistory);
 backToStartFromHistoryButton.addEventListener('click', showStartScreen);
 backToStartFromVideoButton.addEventListener('click', showStartScreen);
-progressButton.addEventListener('click', showProgress);
-backToStartFromProgressButton.addEventListener('click', showStartScreen);
-largeCategorySelect.addEventListener('change', (e) => {
-    const selectedLargeCode = e.target.value;
-    mediumCategorySelect.innerHTML = '';
-    smallCategorySelect.innerHTML = '';
-    mediumCategoryWrapper.style.display = 'none';
-    smallCategoryWrapper.style.display = 'none';
-    if (selectedLargeCode === 'all' || !categoryTree[selectedLargeCode]) return;
-    const mediumCats = categoryTree[selectedLargeCode].children;
-    if (Object.keys(mediumCats).length > 0) {
-        mediumCategorySelect.appendChild(new Option('すべての中分類', 'all'));
-        for (const mediumCode in mediumCats) {
-            mediumCategorySelect.appendChild(new Option(mediumCats[mediumCode].name, mediumCode));
-        }
-        mediumCategoryWrapper.style.display = 'block';
-    }
-});
-mediumCategorySelect.addEventListener('change', (e) => {
-    const selectedLargeCode = largeCategorySelect.value;
-    const selectedMediumCode = e.target.value;
-    smallCategorySelect.innerHTML = '';
-    smallCategoryWrapper.style.display = 'none';
-    if (selectedMediumCode === 'all' || !categoryTree[selectedLargeCode] || !categoryTree[selectedLargeCode].children[selectedMediumCode]) return;
-    const smallCats = categoryTree[selectedLargeCode].children[selectedMediumCode].children;
-    if (Object.keys(smallCats).length > 0) {
-        smallCategorySelect.appendChild(new Option('すべての小分類', 'all'));
-        for (const smallCode in smallCats) {
-            smallCategorySelect.appendChild(new Option(smallCats[smallCode].name, smallCode));
-        }
-        smallCategoryWrapper.style.display = 'block';
-    }
-});
 
 /**
  * =================================================================
  *  初期化処理
  * =================================================================
  */
-async function initializeCategorySelector() {
-    largeCategorySelect.disabled = true;
-    startButton.disabled = true;
-    const loadingOption = new Option('カテゴリを読み込み中...', '', true, true);
-    largeCategorySelect.add(loadingOption, 1);
-    try {
-        const url = `${API_URL}?key=${SECRET_KEY}&action=get_category_tree`;
-        const response = await fetch(url);
-        if (!response.ok) throw new Error('カテゴリの取得に失敗しました');
-        categoryTree = await response.json();
-        largeCategorySelect.removeChild(loadingOption);
-        for (const largeCode in categoryTree) {
-            largeCategorySelect.appendChild(new Option(categoryTree[largeCode].name, largeCode));
-        }
-    } catch (error) {
-        console.error(error);
-        loadingOption.textContent = '読み込みに失敗';
-    } finally {
-        largeCategorySelect.disabled = false;
-        startButton.disabled = false;
-    }
-}
-function initializePage() {
+async function initializePage() {
     const params = new URLSearchParams(window.location.search);
     const l = params.get('l');
     const m = params.get('m');
     const s = params.get('s');
-    if (l && m && s) {
-        startContainer.style.display = 'none';
-        const tempUrl = `${API_URL}?key=${SECRET_KEY}&action=get_category_tree`;
-        fetch(tempUrl).then(res => res.json()).then(tree => {
-            categoryTree = tree;
-            if (tree[l] && tree[l].children[m] && tree[l].children[m].children[s]) {
-                const nameL = tree[l].name;
-                const nameM = tree[l].children[m].name;
-                const nameS = tree[l].children[m].children[s].name;
-                currentGroupName = `${nameL} > ${nameM} > ${nameS}`;
-                const videoId = tree[l].children[m].children[s].videoId;
-                if (videoId) {
-                    showVideoScreen(videoId, { l, m, s });
-                    updateProgressData(s, { video: true });
-                } else {
-                    fetchQuizData({ l, m, s });
-                }
-            }
-        });
-    } else {
-        initializeCategorySelector();
+    try {
+        dashboardList.innerHTML = '<p>カテゴリを読み込み中...</p>';
+        const url = `${API_URL}?key=${SECRET_KEY}&action=get_category_tree`;
+        const response = await fetch(url);
+        if (!response.ok) throw new Error('カテゴリの取得に失敗しました');
+        categoryTree = await response.json();
+        if (l && m && s && categoryTree[l]?.children[m]?.children[s]) {
+            startContainer.style.display = 'none';
+            handleStartFromDashboard(l, m, s);
+        } else {
+            showDashboard();
+        }
+    } catch (error) {
+        console.error(error);
+        startContainer.innerHTML = '<h2>エラー</h2><p>データの読み込みに失敗しました。ページを再読み込みしてください。</p>';
     }
 }
 // パスワード認証成功後にinitializePageが呼ばれる
