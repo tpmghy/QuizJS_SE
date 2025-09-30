@@ -19,7 +19,6 @@
         </div>
     </div>
 
-
     <!-- クイズゲーム本体（最初は非表示） -->
     <div class="container" id="quiz-app-container" style="display: none;">
         <h1>4択クイズゲーム</h1>
@@ -41,8 +40,18 @@
                 <label for="group-small-select">小分類</label>
                 <select id="group-small-select"></select>
             </div>
-            <button id="start-btn">クイズ開始！</button>
+            <button id="start-btn">学習・クイズ開始！</button>
             <button id="history-btn" class="secondary-btn">学習履歴を見る</button>
+        </div>
+
+        <!-- 動画学習画面 -->
+        <div id="video-container" style="display: none;">
+            <h2 id="video-title"></h2>
+            <div class="video-wrapper">
+                <iframe id="youtube-player" width="560" height="315" src="" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            </div>
+            <button id="proceed-to-quiz-btn">クイズに進む</button>
+            <button id="back-to-start-from-video-btn" class="secondary-btn">カテゴリ選択に戻る</button>
         </div>
 
         <!-- クイズ本体（最初は非表示） -->
@@ -73,9 +82,7 @@
         <div id="review-container" style="display: none;">
             <h2>解答の振り返り</h2>
             <p>挑戦したカテゴリ: <span id="review-group-name"></span></p>
-            <div id="review-list">
-                <!-- ここに解答一覧が動的に生成されます -->
-            </div>
+            <div id="review-list"></div>
             <div class="result-buttons">
                 <button id="save-review-image-btn">解答を画像で保存</button>
                 <button id="restart-btn">カテゴリ選択に戻る</button>
@@ -86,9 +93,7 @@
         <div id="history-container" style="display: none;">
             <h2>学習履歴</h2>
             <p>これまでに解いた問題の正解・不正解の回数です。</p>
-            <div id="history-list">
-                <!-- ここに学習履歴が動的に生成されます -->
-            </div>
+            <div id="history-list"></div>
             <button id="back-to-start-from-history-btn">カテゴリ選択に戻る</button>
         </div>
     </div>

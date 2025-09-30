@@ -3,53 +3,36 @@ const API_URL = '__API_URL__';
 const SECRET_KEY = '__SECRET_KEY__';
 // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
 
-
 /**
  * =================================================================
  *  パスワード認証
  * =================================================================
  */
-// ▼▼▼ 正しいパスワードをここに設定してください ▼▼▼
-const CORRECT_PASSWORD = '2025'; 
-// ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
-
+const CORRECT_PASSWORD = 'your_password_here'; 
 const passwordContainer = document.getElementById('password-container');
 const passwordInput = document.getElementById('password-input');
 const passwordSubmitBtn = document.getElementById('password-submit-btn');
 const passwordError = document.getElementById('password-error');
 const quizAppContainer = document.getElementById('quiz-app-container');
-
 function checkPassword() {
-    const enteredPassword = passwordInput.value;
-    if (enteredPassword === CORRECT_PASSWORD) {
-        // パスワードが正しければ、認証画面を非表示にし、クイズアプリを表示
+    if (passwordInput.value === CORRECT_PASSWORD) {
         passwordContainer.style.display = 'none';
-        quizAppContainer.style.display = 'flex'; // .containerはflexboxなのでflexを指定
-        
-        // クイズアプリの初期化処理を実行
+        quizAppContainer.style.display = 'flex';
         initializePage();
     } else {
-        // パスワードが間違っていれば、エラーメッセージを表示
         passwordError.textContent = 'パスワードが違います。';
-        passwordInput.value = ''; // 入力欄をクリア
-        passwordInput.focus(); // 再度入力欄にフォーカス
+        passwordInput.value = '';
+        passwordInput.focus();
     }
 }
-
-// 認証ボタンがクリックされた時の処理
 passwordSubmitBtn.addEventListener('click', checkPassword);
-
-// パスワード入力欄でEnterキーが押された時の処理
 passwordInput.addEventListener('keydown', (event) => {
-    if (event.key === 'Enter') {
-        checkPassword();
-    }
+    if (event.key === 'Enter') checkPassword();
 });
-
 
 /**
  * =================================================================
- *  HTML要素の取得 (クイズアプリ本体)
+ *  HTML要素の取得
  * =================================================================
  */
 // --- スタート画面 ---
@@ -61,14 +44,18 @@ const mediumCategorySelect = document.getElementById('group-medium-select');
 const smallCategorySelect = document.getElementById('group-small-select');
 const mediumCategoryWrapper = document.getElementById('medium-category-wrapper');
 const smallCategoryWrapper = document.getElementById('small-category-wrapper');
-
+// --- 動画学習画面 ---
+const videoContainer = document.getElementById('video-container');
+const videoTitle = document.getElementById('video-title');
+const youtubePlayer = document.getElementById('youtube-player');
+const proceedToQuizButton = document.getElementById('proceed-to-quiz-btn');
+const backToStartFromVideoButton = document.getElementById('back-to-start-from-video-btn');
 // --- クイズ画面 ---
 const quizContainer = document.getElementById('quiz-container');
 const questionElement = document.getElementById('question');
 const choiceButtons = document.querySelectorAll('.choice-btn');
 const feedbackElement = document.getElementById('feedback');
 const currentGroupElement = document.getElementById('current-group');
-
 // --- 結果画面 ---
 const resultContainer = document.getElementById('result-container');
 const scoreElement = document.getElementById('score');
@@ -76,19 +63,16 @@ const totalQuestionsElement = document.getElementById('total-questions');
 const resultGroupNameElement = document.getElementById('result-group-name');
 const reviewButton = document.getElementById('review-btn');
 const backToStartButton = document.getElementById('back-to-start-btn');
-
 // --- 解答一覧画面 ---
 const reviewContainer = document.getElementById('review-container');
 const reviewList = document.getElementById('review-list');
 const restartButton = document.getElementById('restart-btn');
 const reviewGroupNameElement = document.getElementById('review-group-name');
 const saveReviewImageButton = document.getElementById('save-review-image-btn');
-
 // --- 学習履歴画面 ---
 const historyContainer = document.getElementById('history-container');
 const historyList = document.getElementById('history-list');
 const backToStartFromHistoryButton = document.getElementById('back-to-start-from-history-btn');
-
 
 /**
  * =================================================================
@@ -107,52 +91,36 @@ let categoryTree = {};
  *  関数の定義
  * =================================================================
  */
-
-/**
- * APIからクイズデータを非同期で取得する関数
- */
 async function fetchQuizData(params) {
     quizContainer.style.display = 'block';
     questionElement.textContent = 'クイズを読み込み中...';
     feedbackElement.textContent = '';
-    
     try {
         const query = new URLSearchParams(params).toString();
         const url = `${API_URL}?key=${SECRET_KEY}&${query}`;
-        
         const response = await fetch(url);
         if (!response.ok) throw new Error(`APIエラー: ${response.status}`);
-        
         quizData = await response.json();
         if (quizData.error) throw new Error(quizData.message);
         if (quizData.length === 0) throw new Error('該当する問題がありませんでした。');
-
         startQuiz();
-
     } catch (error) {
         console.error('クイズデータの取得に失敗しました:', error);
         questionElement.textContent = `クイズの読み込みに失敗しました: ${error.message}`;
     }
 }
-
-/**
- * クイズの初期化と開始を行う関数
- */
 function startQuiz() {
     currentQuestionIndex = 0;
     score = 0;
     userAnswers = [];
     startContainer.style.display = 'none';
+    videoContainer.style.display = 'none';
     resultContainer.style.display = 'none';
     reviewContainer.style.display = 'none';
     historyContainer.style.display = 'none';
     quizContainer.style.display = 'block';
     showQuestion();
 }
-
-/**
- * 現在の問題と選択肢を画面に表示する関数
- */
 function showQuestion() {
     currentGroupElement.textContent = `カテゴリ: ${currentGroupName}`;
     const currentQuestion = quizData[currentQuestionIndex];
@@ -167,10 +135,6 @@ function showQuestion() {
         button.style.borderColor = '#ddd';
     });
 }
-
-/**
- * ユーザーの回答を判定し、次の問題へ進むボタンを表示する関数
- */
 function checkAnswer(selectedIndex) {
     choiceButtons.forEach(button => button.disabled = true);
     const currentQuestion = quizData[currentQuestionIndex];
@@ -194,7 +158,6 @@ function checkAnswer(selectedIndex) {
         }
         localStorage.setItem('quizHistory', JSON.stringify(historyData));
     } catch (e) { console.error('学習履歴の保存に失敗しました:', e); }
-
     const feedbackText = document.createElement('p');
     if (isCorrect) {
         score++;
@@ -219,10 +182,6 @@ function checkAnswer(selectedIndex) {
     });
     feedbackElement.appendChild(nextButton);
 }
-
-/**
- * 最終的なクイズの結果を画面に表示する関数
- */
 function showResult() {
     quizContainer.style.display = 'none';
     resultContainer.style.display = 'block';
@@ -230,10 +189,6 @@ function showResult() {
     scoreElement.textContent = score;
     totalQuestionsElement.textContent = quizData.length;
 }
-
-/**
- * 解答一覧を生成して表示する関数
- */
 function showReview() {
     resultContainer.style.display = 'none';
     reviewContainer.style.display = 'block';
@@ -249,17 +204,13 @@ function showReview() {
         reviewList.appendChild(reviewItem);
     });
 }
-
-/**
- * 解答一覧画面を画像として保存する関数
- */
 async function saveReviewAsImage() {
     saveReviewImageButton.disabled = true;
     saveReviewImageButton.textContent = '画像生成中...';
     reviewList.style.maxHeight = 'none';
     reviewList.style.overflowY = 'visible';
     try {
-        const canvas = await html2canvas(reviewContainer, { backgroundColor: '#ffffff', windowWidth: document.documentElement.offsetWidth, windowHeight: document.documentElement.offsetHeight, scrollX: -window.scrollX, scrollY: -window.scrollY, scale: 2 });
+        const canvas = await html2canvas(reviewContainer, { backgroundColor: '#ffffff', scale: 2 });
         const imageUrl = canvas.toDataURL('image/png');
         const downloadLink = document.createElement('a');
         const date = new Date();
@@ -277,10 +228,6 @@ async function saveReviewAsImage() {
         saveReviewImageButton.textContent = '解答を画像で保存';
     }
 }
-
-/**
- * 学習履歴を生成して表示する関数
- */
 function showHistory() {
     startContainer.style.display = 'none';
     historyContainer.style.display = 'block';
@@ -297,76 +244,100 @@ function showHistory() {
         historyList.appendChild(historyItem);
     });
 }
-
-/**
- * スタート画面（カテゴリ選択画面）に戻る関数
- */
 function showStartScreen() {
-    resultContainer.style.display = 'none';
+    startContainer.style.display = 'block';
+    videoContainer.style.display = 'none';
     quizContainer.style.display = 'none';
+    resultContainer.style.display = 'none';
     reviewContainer.style.display = 'none';
     historyContainer.style.display = 'none';
-    startContainer.style.display = 'block';
+    youtubePlayer.src = ''; // 動画再生を停止
 }
-
+function handleStartButtonClick() {
+    const largeCode = largeCategorySelect.value;
+    const mediumCode = mediumCategorySelect.value;
+    const smallCode = smallCategorySelect.value;
+    let nameParts = [];
+    let videoId = null;
+    if (largeCode && largeCode !== 'all') {
+        nameParts.push(categoryTree[largeCode].name);
+        if (mediumCode && mediumCode !== 'all') {
+            nameParts.push(categoryTree[largeCode].children[mediumCode].name);
+            if (smallCode && smallCode !== 'all') {
+                const smallCatData = categoryTree[largeCode].children[mediumCode].children[smallCode];
+                nameParts.push(smallCatData.name);
+                videoId = smallCatData.videoId;
+            }
+        }
+    }
+    currentGroupName = nameParts.length > 0 ? nameParts.join(' > ') : 'すべての問題';
+    const params = { l: largeCode };
+    if (mediumCode && mediumCode !== 'all') params.m = mediumCode;
+    if (smallCode && smallCode !== 'all') params.s = smallCode;
+    startContainer.style.display = 'none';
+    if (videoId) {
+        showVideoScreen(videoId, params);
+    } else {
+        fetchQuizData(params);
+    }
+}
+function showVideoScreen(videoId, quizParams) {
+    videoTitle.textContent = `学習動画: ${currentGroupName}`;
+    youtubePlayer.src = `https://www.youtube.com/embed/${videoId}`;
+    videoContainer.style.display = 'block';
+    const newButton = proceedToQuizButton.cloneNode(true);
+    proceedToQuizButton.parentNode.replaceChild(newButton, proceedToQuizButton);
+    newButton.addEventListener('click', () => {
+        videoContainer.style.display = 'none';
+        youtubePlayer.src = '';
+        fetchQuizData(quizParams);
+    });
+}
 
 /**
  * =================================================================
- *  イベントリスナーの設定 (クイズアプリ本体)
+ *  イベントリスナーの設定
  * =================================================================
  */
-startButton.addEventListener('click', () => {
-    startContainer.style.display = 'none';
-    const large = largeCategorySelect.value;
-    const medium = mediumCategorySelect.value;
-    const small = smallCategorySelect.value;
-    const params = { large };
-    if (medium && medium !== 'all') params.medium = medium;
-    if (small && small !== 'all') params.small = small;
-    let nameParts = [];
-    if (large && large !== 'all') nameParts.push(largeCategorySelect.options[largeCategorySelect.selectedIndex].text);
-    if (medium && medium !== 'all') nameParts.push(mediumCategorySelect.options[mediumCategorySelect.selectedIndex].text);
-    if (small && small !== 'all') nameParts.push(smallCategorySelect.options[smallCategorySelect.selectedIndex].text);
-    currentGroupName = nameParts.length > 0 ? nameParts.join(' > ') : 'すべての問題';
-    fetchQuizData(params);
-});
-
+startButton.addEventListener('click', handleStartButtonClick);
 reviewButton.addEventListener('click', showReview);
 backToStartButton.addEventListener('click', showStartScreen);
 saveReviewImageButton.addEventListener('click', saveReviewAsImage);
 restartButton.addEventListener('click', showStartScreen);
 historyButton.addEventListener('click', showHistory);
 backToStartFromHistoryButton.addEventListener('click', showStartScreen);
-
+backToStartFromVideoButton.addEventListener('click', showStartScreen);
 largeCategorySelect.addEventListener('change', (e) => {
-    const selectedLarge = e.target.value;
+    const selectedLargeCode = e.target.value;
     mediumCategorySelect.innerHTML = '';
     smallCategorySelect.innerHTML = '';
     mediumCategoryWrapper.style.display = 'none';
     smallCategoryWrapper.style.display = 'none';
-    if (selectedLarge === 'all' || !categoryTree[selectedLarge]) { return; }
-    const mediumCats = Object.keys(categoryTree[selectedLarge]);
-    if (mediumCats.length > 0) {
+    if (selectedLargeCode === 'all' || !categoryTree[selectedLargeCode]) return;
+    const mediumCats = categoryTree[selectedLargeCode].children;
+    if (Object.keys(mediumCats).length > 0) {
         mediumCategorySelect.appendChild(new Option('すべての中分類', 'all'));
-        mediumCats.forEach(medium => { mediumCategorySelect.appendChild(new Option(medium, medium)); });
+        for (const mediumCode in mediumCats) {
+            mediumCategorySelect.appendChild(new Option(mediumCats[mediumCode].name, mediumCode));
+        }
         mediumCategoryWrapper.style.display = 'block';
     }
 });
-
 mediumCategorySelect.addEventListener('change', (e) => {
-    const selectedLarge = largeCategorySelect.value;
-    const selectedMedium = e.target.value;
+    const selectedLargeCode = largeCategorySelect.value;
+    const selectedMediumCode = e.target.value;
     smallCategorySelect.innerHTML = '';
     smallCategoryWrapper.style.display = 'none';
-    if (selectedMedium === 'all' || !categoryTree[selectedLarge] || !categoryTree[selectedLarge][selectedMedium]) { return; }
-    const smallCats = categoryTree[selectedLarge][selectedMedium];
-    if (smallCats.length > 0) {
+    if (selectedMediumCode === 'all' || !categoryTree[selectedLargeCode] || !categoryTree[selectedLargeCode].children[selectedMediumCode]) return;
+    const smallCats = categoryTree[selectedLargeCode].children[selectedMediumCode].children;
+    if (Object.keys(smallCats).length > 0) {
         smallCategorySelect.appendChild(new Option('すべての小分類', 'all'));
-        smallCats.forEach(small => { smallCategorySelect.appendChild(new Option(small, small)); });
+        for (const smallCode in smallCats) {
+            smallCategorySelect.appendChild(new Option(smallCats[smallCode].name, smallCode));
+        }
         smallCategoryWrapper.style.display = 'block';
     }
 });
-
 
 /**
  * =================================================================
@@ -378,20 +349,15 @@ async function initializeCategorySelector() {
     startButton.disabled = true;
     const loadingOption = new Option('カテゴリを読み込み中...', '', true, true);
     largeCategorySelect.add(loadingOption, 1);
-    
     try {
         const url = `${API_URL}?key=${SECRET_KEY}&action=get_category_tree`;
         const response = await fetch(url);
         if (!response.ok) throw new Error('カテゴリの取得に失敗しました');
-        
         categoryTree = await response.json();
-        
         largeCategorySelect.removeChild(loadingOption);
-        
-        Object.keys(categoryTree).forEach(large => {
-            largeCategorySelect.appendChild(new Option(large, large));
-        });
-
+        for (const largeCode in categoryTree) {
+            largeCategorySelect.appendChild(new Option(categoryTree[largeCode].name, largeCode));
+        }
     } catch (error) {
         console.error(error);
         loadingOption.textContent = '読み込みに失敗';
@@ -400,22 +366,32 @@ async function initializeCategorySelector() {
         startButton.disabled = false;
     }
 }
-
 function initializePage() {
     const params = new URLSearchParams(window.location.search);
-    const large = params.get('large');
-    const medium = params.get('medium');
-    const small = params.get('small');
-
-    if (large && medium && small) {
+    const l = params.get('l');
+    const m = params.get('m');
+    const s = params.get('s');
+    if (l && m && s) {
         startContainer.style.display = 'none';
-        currentGroupName = `${large} > ${medium} > ${small}`;
-        fetchQuizData({ large, medium, small });
+        // カテゴリ名を取得するために、まずカテゴリツリーを非同期で読み込む
+        const tempUrl = `${API_URL}?key=${SECRET_KEY}&action=get_category_tree`;
+        fetch(tempUrl).then(res => res.json()).then(tree => {
+            categoryTree = tree;
+            if (tree[l] && tree[l].children[m] && tree[l].children[m].children[s]) {
+                const nameL = tree[l].name;
+                const nameM = tree[l].children[m].name;
+                const nameS = tree[l].children[m].children[s].name;
+                currentGroupName = `${nameL} > ${nameM} > ${nameS}`;
+                const videoId = tree[l].children[m].children[s].videoId;
+                if (videoId) {
+                    showVideoScreen(videoId, { l, m, s });
+                } else {
+                    fetchQuizData({ l, m, s });
+                }
+            }
+        });
     } else {
         initializeCategorySelector();
     }
 }
-
-// ページ読み込み時のメイン処理は、パスワード認証が成功した後に呼び出されるため、
-// ここでの自動実行は不要です。
-// initializePage();
+// パスワード認証成功後にinitializePageが呼ばれる
