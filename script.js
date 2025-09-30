@@ -35,37 +35,38 @@ passwordInput.addEventListener('keydown', (event) => {
  *  HTML要素の取得
  * =================================================================
  */
-// --- スタート画面 ---
+// --- 各画面のコンテナ ---
 const startContainer = document.getElementById('start-container');
+const videoContainer = document.getElementById('video-container');
+const quizContainer = document.getElementById('quiz-container');
+const resultContainer = document.getElementById('result-container');
+const reviewContainer = document.getElementById('review-container');
+const historyContainer = document.getElementById('history-container');
+// --- スタート画面 ---
 const historyButton = document.getElementById('history-btn');
 const dashboardList = document.getElementById('dashboard-list');
 // --- 動画学習画面 ---
-const videoContainer = document.getElementById('video-container');
 const videoTitle = document.getElementById('video-title');
 const youtubePlayer = document.getElementById('youtube-player');
 const proceedToQuizButton = document.getElementById('proceed-to-quiz-btn');
 const backToStartFromVideoButton = document.getElementById('back-to-start-from-video-btn');
 // --- クイズ画面 ---
-const quizContainer = document.getElementById('quiz-container');
 const questionElement = document.getElementById('question');
 const choiceButtons = document.querySelectorAll('.choice-btn');
 const feedbackElement = document.getElementById('feedback');
 const currentGroupElement = document.getElementById('current-group');
 // --- 結果画面 ---
-const resultContainer = document.getElementById('result-container');
 const scoreElement = document.getElementById('score');
 const totalQuestionsElement = document.getElementById('total-questions');
 const resultGroupNameElement = document.getElementById('result-group-name');
 const reviewButton = document.getElementById('review-btn');
 const backToStartButton = document.getElementById('back-to-start-btn');
 // --- 解答一覧画面 ---
-const reviewContainer = document.getElementById('review-container');
 const reviewList = document.getElementById('review-list');
 const restartButton = document.getElementById('restart-btn');
 const reviewGroupNameElement = document.getElementById('review-group-name');
 const saveReviewImageButton = document.getElementById('save-review-image-btn');
 // --- 学習履歴画面 ---
-const historyContainer = document.getElementById('history-container');
 const historyList = document.getElementById('history-list');
 const backToStartFromHistoryButton = document.getElementById('back-to-start-from-history-btn');
 
@@ -106,9 +107,7 @@ function updateProgressData(smallCode, dataToUpdate) {
             progressData[smallCode].total = dataToUpdate.total;
         }
         localStorage.setItem('quizProgress', JSON.stringify(progressData));
-    } catch (e) {
-        console.error('進捗データの保存に失敗しました:', e);
-    }
+    } catch (e) { console.error('進捗データの保存に失敗しました:', e); }
 }
 
 /**
@@ -342,7 +341,9 @@ function showDashboard() {
                 const startButton = document.createElement('button');
                 startButton.className = 'dashboard-start-btn';
                 startButton.textContent = '開始';
-                startButton.onclick = () => handleStartFromDashboard(largeCode, mediumCode, smallCode);
+                // ▼▼▼ 修正点: onclickではなく、addEventListenerを使用する ▼▼▼
+                startButton.addEventListener('click', () => handleStartFromDashboard(largeCode, mediumCode, smallCode));
+                // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
                 item.appendChild(startButton);
                 dashboardList.appendChild(item);
             }
@@ -358,6 +359,7 @@ function showDashboard() {
  *  イベントリスナーの設定
  * =================================================================
  */
+// ダッシュボードから開始するため、古いstartButtonのリスナーは不要
 reviewButton.addEventListener('click', showReview);
 backToStartButton.addEventListener('click', showStartScreen);
 saveReviewImageButton.addEventListener('click', saveReviewAsImage);
