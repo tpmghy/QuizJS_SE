@@ -251,7 +251,7 @@ function showStartScreen() {
     resultContainer.style.display = 'none';
     reviewContainer.style.display = 'none';
     historyContainer.style.display = 'none';
-    youtubePlayer.src = ''; // 動画再生を停止
+    youtubePlayer.src = '';
 }
 function handleStartButtonClick() {
     const largeCode = largeCategorySelect.value;
@@ -307,37 +307,51 @@ restartButton.addEventListener('click', showStartScreen);
 historyButton.addEventListener('click', showHistory);
 backToStartFromHistoryButton.addEventListener('click', showStartScreen);
 backToStartFromVideoButton.addEventListener('click', showStartScreen);
+
+// ▼▼▼ ここからが連動ドロップダウンの修正箇所 ▼▼▼
 largeCategorySelect.addEventListener('change', (e) => {
     const selectedLargeCode = e.target.value;
     mediumCategorySelect.innerHTML = '';
     smallCategorySelect.innerHTML = '';
     mediumCategoryWrapper.style.display = 'none';
     smallCategoryWrapper.style.display = 'none';
-    if (selectedLargeCode === 'all' || !categoryTree[selectedLargeCode]) return;
+
+    if (selectedLargeCode === 'all' || !categoryTree[selectedLargeCode]) {
+        return;
+    }
+
     const mediumCats = categoryTree[selectedLargeCode].children;
     if (Object.keys(mediumCats).length > 0) {
         mediumCategorySelect.appendChild(new Option('すべての中分類', 'all'));
+        // オブジェクトのキー(コード)をループし、名前を表示、値をコードに設定
         for (const mediumCode in mediumCats) {
             mediumCategorySelect.appendChild(new Option(mediumCats[mediumCode].name, mediumCode));
         }
         mediumCategoryWrapper.style.display = 'block';
     }
 });
+
 mediumCategorySelect.addEventListener('change', (e) => {
     const selectedLargeCode = largeCategorySelect.value;
     const selectedMediumCode = e.target.value;
     smallCategorySelect.innerHTML = '';
     smallCategoryWrapper.style.display = 'none';
-    if (selectedMediumCode === 'all' || !categoryTree[selectedLargeCode] || !categoryTree[selectedLargeCode].children[selectedMediumCode]) return;
+
+    if (selectedMediumCode === 'all' || !categoryTree[selectedLargeCode] || !categoryTree[selectedLargeCode].children[selectedMediumCode]) {
+        return;
+    }
+
     const smallCats = categoryTree[selectedLargeCode].children[selectedMediumCode].children;
     if (Object.keys(smallCats).length > 0) {
         smallCategorySelect.appendChild(new Option('すべての小分類', 'all'));
+        // オブジェクトのキー(コード)をループし、名前を表示、値をコードに設定
         for (const smallCode in smallCats) {
             smallCategorySelect.appendChild(new Option(smallCats[smallCode].name, smallCode));
         }
         smallCategoryWrapper.style.display = 'block';
     }
 });
+// ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
 
 /**
  * =================================================================
@@ -349,15 +363,22 @@ async function initializeCategorySelector() {
     startButton.disabled = true;
     const loadingOption = new Option('カテゴリを読み込み中...', '', true, true);
     largeCategorySelect.add(loadingOption, 1);
+    
     try {
         const url = `${API_URL}?key=${SECRET_KEY}&action=get_category_tree`;
         const response = await fetch(url);
         if (!response.ok) throw new Error('カテゴリの取得に失敗しました');
+        
         categoryTree = await response.json();
         largeCategorySelect.removeChild(loadingOption);
+        
+        // ▼▼▼ 大分類の選択肢を生成する部分を修正 ▼▼▼
+        // オブジェクトのキー(コード)をループし、名前を表示、値をコードに設定
         for (const largeCode in categoryTree) {
             largeCategorySelect.appendChild(new Option(categoryTree[largeCode].name, largeCode));
         }
+        // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
+
     } catch (error) {
         console.error(error);
         loadingOption.textContent = '読み込みに失敗';
@@ -366,14 +387,15 @@ async function initializeCategorySelector() {
         startButton.disabled = false;
     }
 }
+
 function initializePage() {
     const params = new URLSearchParams(window.location.search);
     const l = params.get('l');
     const m = params.get('m');
     const s = params.get('s');
+
     if (l && m && s) {
         startContainer.style.display = 'none';
-        // カテゴリ名を取得するために、まずカテゴリツリーを非同期で読み込む
         const tempUrl = `${API_URL}?key=${SECRET_KEY}&action=get_category_tree`;
         fetch(tempUrl).then(res => res.json()).then(tree => {
             categoryTree = tree;
