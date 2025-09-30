@@ -27,15 +27,13 @@
         <div id="start-container">
             <h2>学習ダッシュボード</h2>
             <p>挑戦したい単元の「開始」ボタンを押してください。</p>
-            <div id="dashboard-list">
-                <!-- ここにダッシュボードが動的に生成されます -->
-            </div>
+            <div id="dashboard-list"></div>
             <div class="start-menu-buttons">
                 <button id="history-btn" class="secondary-btn">全問題の学習履歴</button>
             </div>
         </div>
         
-        <!-- 動画学習画面 -->
+        <!-- (以降の画面構成は変更なし) -->
         <div id="video-container" style="display: none;">
             <h2 id="video-title"></h2>
             <div class="video-wrapper">
@@ -44,8 +42,6 @@
             <button id="proceed-to-quiz-btn">クイズに進む</button>
             <button id="back-to-start-from-video-btn" class="secondary-btn">ダッシュボードに戻る</button>
         </div>
-
-        <!-- クイズ本体（最初は非表示） -->
         <div id="quiz-container" style="display: none;">
             <p id="current-group" class="category-display"></p>
             <p id="question"></p>
@@ -57,8 +53,6 @@
             </div>
             <div id="feedback"></div>
         </div>
-
-        <!-- 結果表示（最初は非表示） -->
         <div id="result-container" style="display: none;">
             <h2>クイズ結果</h2>
             <p>挑戦したカテゴリ: <span id="result-group-name"></span></p>
@@ -68,8 +62,6 @@
                 <button id="back-to-start-btn">ダッシュボードに戻る</button>
             </div>
         </div>
-
-        <!-- 解答一覧画面 -->
         <div id="review-container" style="display: none;">
             <h2>解答の振り返り</h2>
             <p>挑戦したカテゴリ: <span id="review-group-name"></span></p>
@@ -79,8 +71,6 @@
                 <button id="restart-btn">ダッシュボードに戻る</button>
             </div>
         </div>
-
-        <!-- 学習履歴画面 -->
         <div id="history-container" style="display: none;">
             <h2>全問題の学習履歴</h2>
             <p>これまでに解いた問題の正解・不正解の回数です。</p>

@@ -42,7 +42,6 @@ const quizContainer = document.getElementById('quiz-container');
 const resultContainer = document.getElementById('result-container');
 const reviewContainer = document.getElementById('review-container');
 const historyContainer = document.getElementById('history-container');
-const progressContainer = document.getElementById('progress-container');
 // --- スタート画面 ---
 const historyButton = document.getElementById('history-btn');
 const dashboardList = document.getElementById('dashboard-list');
@@ -143,7 +142,6 @@ function startQuiz() {
     resultContainer.style.display = 'none';
     reviewContainer.style.display = 'none';
     historyContainer.style.display = 'none';
-    progressContainer.style.display = 'none';
     quizContainer.style.display = 'block';
     showQuestion();
 }
@@ -279,7 +277,6 @@ function showStartScreen() {
     resultContainer.style.display = 'none';
     reviewContainer.style.display = 'none';
     historyContainer.style.display = 'none';
-    progressContainer.style.display = 'none';
     youtubePlayer.src = '';
     showDashboard();
 }
