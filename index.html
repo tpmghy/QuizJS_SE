@@ -27,18 +27,13 @@
         <div id="start-container">
             <h2>学習ダッシュボード</h2>
             <p>挑戦したい単元の「開始」ボタンを押してください。</p>
-            <!-- ▼▼▼ ここにダッシュボードが動的に生成されます ▼▼▼ -->
             <div id="dashboard-list"></div>
-            <!-- ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲ -->
             <div class="start-menu-buttons">
                 <button id="history-btn" class="secondary-btn">全問題の学習履歴</button>
             </div>
         </div>
         
         <!-- (以降の画面構成は変更なし) -->
-        <div id="progress-container" style="display: none;">
-            <!-- この画面は現在使われていませんが、将来のために残しておいても良いでしょう -->
-        </div>
         <div id="video-container" style="display: none;">
             <h2 id="video-title"></h2>
             <div class="video-wrapper">
@@ -84,6 +79,9 @@
         </div>
     </div>
     
+    <!-- ▼▼▼ config.js を script.js より先に読み込む ▼▼▼ -->
+    <script src="config.js"></script>
     <script src="script.js"></script>
+    <!-- ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲ -->
 </body>
 </html>
