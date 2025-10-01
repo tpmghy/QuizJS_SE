@@ -5,7 +5,7 @@
  *  パスワード認証
  * =================================================================
  */
-const CORRECT_PASSWORD = 'quiz1234'; // ★★★ 必ず実際のパスワードに変更してください ★★★
+const CORRECT_PASSWORD = 'your_password_here'; // ★★★ 必ず実際のパスワードに変更してください ★★★
 const passwordContainer = document.getElementById('password-container');
 const passwordInput = document.getElementById('password-input');
 const passwordSubmitBtn = document.getElementById('password-submit-btn');
@@ -75,7 +75,7 @@ let currentQuestionIndex = 0;
 let score = 0;
 let currentGroupName = '';
 let userAnswers = [];
-let categoryMap = {}; // ★ 変更点: categoryTreeからcategoryMapに変更
+let categoryMap = {};
 
 
 /**
@@ -89,7 +89,7 @@ function getProgressData() {
     } catch (e) { return {}; }
 }
 
-function updateProgressData(categoryCode, dataToUpdate) { // ★ 引数をsmallCodeから変更
+function updateProgressData(categoryCode, dataToUpdate) {
     if (!categoryCode) return;
     try {
         const progressData = getProgressData();
@@ -116,26 +116,22 @@ function updateProgressData(categoryCode, dataToUpdate) { // ★ 引数をsmallC
  * =================================================================
  */
 
-// ★ 修正: master_data.csvからカテゴリのマップ（連想配列）を生成する
+// master_data.csvからカテゴリのマップ（連想配列）を生成する
 function buildCategoryMap(masterData) {
-    console.log('buildCategoryMap - masterData:', masterData); // デバッグ用
     const map = {};
     masterData.forEach(row => {
-        console.log('Processing row:', row); // デバッグ用
         if (row.category_code) {
             map[row.category_code] = {
                 name: row.category_name,
-                videoId: row.video_id || '' // video_idが空でも空文字列として設定
+                videoId: row.video_id
             };
         }
     });
-    console.log('Final categoryMap:', map); // デバッグ用
     return map;
 }
 
-// ★ 修正: 指定カテゴリの問題を準備し、クイズを開始する
+// 指定カテゴリの問題を準備し、クイズを開始する
 function prepareAndStartQuiz(params) {
-    // 1段階のcategory_codeを使って問題を絞り込む
     const filteredData = allQuizData.filter(row => row.category_code === params.c);
 
     if (filteredData.length === 0) {
@@ -173,8 +169,24 @@ function startQuiz() {
     currentQuestionIndex = 0;
     score = 0;
     userAnswers = [];
-    startContainer.style.display = 'none';
+    [videoContainer, resultContainer, reviewContainer, historyContainer, startContainer].forEach(c => c.style.display = 'none');
     quizContainer.style.display = 'block';
+
+    // ▼▼▼【ここから変更点】▼▼▼
+    // クイズ画面に「ダッシュボードに戻る」ボタンを追加する（すでに追加済みの場合は何もしない）
+    if (!document.getElementById('back-to-dashboard-from-quiz-btn')) {
+        const backButton = document.createElement('button');
+        backButton.id = 'back-to-dashboard-from-quiz-btn';
+        backButton.textContent = 'ダッシュボードに戻る';
+        backButton.className = 'secondary-btn back-from-quiz'; // スタイルを適用しやすくするためのクラス
+        backButton.style.marginTop = '20px'; // ボタンの上のスペース
+        backButton.addEventListener('click', showStartScreen);
+        
+        // ボタンをクイズコンテナの末尾に追加
+        quizContainer.appendChild(backButton);
+    }
+    // ▲▲▲【ここまで変更点】▲▲▲
+
     showQuestion();
 }
 
@@ -251,7 +263,7 @@ function showResult() {
     resultGroupNameElement.textContent = currentGroupName;
     scoreElement.textContent = score;
     totalQuestionsElement.textContent = quizData.length;
-    const categoryCode = document.body.dataset.currentCategoryCode; // ★ 修正
+    const categoryCode = document.body.dataset.currentCategoryCode;
     updateProgressData(categoryCode, { score: score, total: quizData.length });
 }
 
@@ -312,13 +324,12 @@ function showStartScreen() {
     showDashboard();
 }
 
-// ★ 修正: 引数を1段階のカテゴリコードに変更
 function handleStartFromDashboard(categoryCode, actionType) {
     const category = categoryMap[categoryCode];
     currentGroupName = category.name;
     const videoId = category.videoId;
-    const params = { c: categoryCode }; // ★ URLパラメータを `c` に変更
-    document.body.dataset.currentCategoryCode = categoryCode; // ★ 修正
+    const params = { c: categoryCode };
+    document.body.dataset.currentCategoryCode = categoryCode;
     startContainer.style.display = 'none';
 
     if (actionType === 'watch' && videoId) {
@@ -342,7 +353,6 @@ function showVideoScreen(videoId, quizParams) {
     });
 }
 
-// ★ 修正: 1段階のカテゴリをダッシュボードに表示
 function showDashboard() {
     dashboardList.innerHTML = '';
     const progressData = getProgressData();
@@ -413,17 +423,8 @@ async function initializePage() {
             fetch('./master_data.csv')
         ]);
 
-        // レスポンスの詳細をログ出力
-        console.log('quizResponse status:', quizResponse.status);
-        console.log('masterResponse status:', masterResponse.status);
-        console.log('quizResponse headers:', [...quizResponse.headers.entries()]);
-        console.log('masterResponse headers:', [...masterResponse.headers.entries()]);
-
-        if (!quizResponse.ok) {
-            throw new Error(`quiz_data.csvの取得に失敗: ${quizResponse.status} ${quizResponse.statusText}`);
-        }
-        if (!masterResponse.ok) {
-            throw new Error(`master_data.csvの取得に失敗: ${masterResponse.status} ${masterResponse.statusText}`);
+        if (!quizResponse.ok || !masterResponse.ok) {
+            throw new Error(`CSVファイルの取得に失敗`);
         }
 
         const [quizCsvText, masterCsvText] = await Promise.all([
@@ -431,26 +432,14 @@ async function initializePage() {
             masterResponse.text()
         ]);
 
-        console.log('quizCsvText length:', quizCsvText.length);
-        console.log('masterCsvText length:', masterCsvText.length);
-        console.log('masterCsvText preview:', masterCsvText.substring(0, 200));
-
-        // CSVファイルがHTMLを返している場合の検出
-        if (masterCsvText.includes('<!DOCTYPE html>') || masterCsvText.includes('<html')) {
-            throw new Error('master_data.csvがHTMLファイルを返しています。ファイルの配置を確認してください。');
-        }
-
         allQuizData = Papa.parse(quizCsvText, { header: true, skipEmptyLines: true }).data;
         allMasterData = Papa.parse(masterCsvText, { header: true, skipEmptyLines: true }).data;
-        
-        console.log('allMasterData after parsing:', allMasterData);
         
         if (allMasterData.length === 0) {
             throw new Error("master_data.csvが空か、正しく読み込めませんでした。");
         }
 
         categoryMap = buildCategoryMap(allMasterData);
-        console.log('categoryMap after build:', categoryMap);
 
         const params = new URLSearchParams(window.location.search);
         const c = params.get('c');
@@ -464,18 +453,6 @@ async function initializePage() {
 
     } catch (error) {
         console.error("初期化エラー:", error);
-        dashboardList.innerHTML = `
-            <div class="error-message">
-                <h3>データの読み込みに失敗しました</h3>
-                <p>エラー: ${error.message}</p>
-                <p>以下の点を確認してください：</p>
-                <ul>
-                    <li>CSVファイルが正しい場所に配置されているか</li>
-                    <li>ファイル名が正確か（master_data.csv, quiz_data.csv）</li>
-                    <li>ファイルがUTF-8でエンコードされているか</li>
-                    <li>ホスティングサービスでCSVファイルが正しく配信されているか</li>
-                </ul>
-            </div>
-        `;
+        startContainer.innerHTML = `<h2>エラー</h2><p>データの読み込みに失敗しました。CSVファイルと文字コード(UTF-8)を確認してください。</p>`;
     }
 }
