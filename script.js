@@ -16,7 +16,7 @@ function checkPassword() {
     if (passwordInput.value === CORRECT_PASSWORD) {
         passwordContainer.style.display = 'none';
         quizAppContainer.style.display = 'flex';
-        initializePage(); // 認証成功後、データ初期化処理を呼び出す
+        initializePage();
     } else {
         passwordError.textContent = 'パスワードが違います。';
         passwordInput.value = '';
@@ -34,38 +34,31 @@ passwordInput.addEventListener('keydown', (event) => {
  *  HTML要素の取得
  * =================================================================
  */
-// --- 各画面のコンテナ ---
 const startContainer = document.getElementById('start-container');
 const videoContainer = document.getElementById('video-container');
 const quizContainer = document.getElementById('quiz-container');
 const resultContainer = document.getElementById('result-container');
 const reviewContainer = document.getElementById('review-container');
 const historyContainer = document.getElementById('history-container');
-// --- スタート画面 ---
 const historyButton = document.getElementById('history-btn');
 const dashboardList = document.getElementById('dashboard-list');
-// --- 動画学習画面 ---
 const videoTitle = document.getElementById('video-title');
 const youtubePlayer = document.getElementById('youtube-player');
 const proceedToQuizButton = document.getElementById('proceed-to-quiz-btn');
 const backToStartFromVideoButton = document.getElementById('back-to-start-from-video-btn');
-// --- クイズ画面 ---
 const questionElement = document.getElementById('question');
 const choiceButtons = document.querySelectorAll('.choice-btn');
 const feedbackElement = document.getElementById('feedback');
 const currentGroupElement = document.getElementById('current-group');
-// --- 結果画面 ---
 const scoreElement = document.getElementById('score');
 const totalQuestionsElement = document.getElementById('total-questions');
 const resultGroupNameElement = document.getElementById('result-group-name');
 const reviewButton = document.getElementById('review-btn');
 const backToStartButton = document.getElementById('back-to-start-btn');
-// --- 解答一覧画面 ---
 const reviewList = document.getElementById('review-list');
 const restartButton = document.getElementById('restart-btn');
 const reviewGroupNameElement = document.getElementById('review-group-name');
 const saveReviewImageButton = document.getElementById('save-review-image-btn');
-// --- 学習履歴画面 ---
 const historyList = document.getElementById('history-list');
 const backToStartFromHistoryButton = document.getElementById('back-to-start-from-history-btn');
 
@@ -75,14 +68,14 @@ const backToStartFromHistoryButton = document.getElementById('back-to-start-from
  *  ゲームの状態を管理する変数
  * =================================================================
  */
-let allQuizData = []; // CSVから読み込んだ全クイズ問題を保持
-let allMasterData = []; // CSVから読み込んだ全マスターデータを保持
-let quizData = []; // 現在のクイズセッションで表示する問題
+let allQuizData = [];
+let allMasterData = [];
+let quizData = [];
 let currentQuestionIndex = 0;
 let score = 0;
 let currentGroupName = '';
 let userAnswers = [];
-let categoryTree = {};
+let categoryMap = {}; // ★ 変更点: categoryTreeからcategoryMapに変更
 
 
 /**
@@ -93,27 +86,24 @@ let categoryTree = {};
 function getProgressData() {
     try {
         return JSON.parse(localStorage.getItem('quizProgress')) || {};
-    } catch (e) {
-        console.error('進捗データの読み込みに失敗しました:', e);
-        return {};
-    }
+    } catch (e) { return {}; }
 }
 
-function updateProgressData(smallCode, dataToUpdate) {
-    if (!smallCode || smallCode === 'all') return;
+function updateProgressData(categoryCode, dataToUpdate) { // ★ 引数をsmallCodeから変更
+    if (!categoryCode) return;
     try {
         const progressData = getProgressData();
-        if (!progressData[smallCode]) {
-            progressData[smallCode] = { videoViews: 0, correct: 0, total: 0 };
+        if (!progressData[categoryCode]) {
+            progressData[categoryCode] = { videoViews: 0, correct: 0, total: 0 };
         }
         if (dataToUpdate.video) {
-            progressData[smallCode].videoViews++;
+            progressData[categoryCode].videoViews++;
         }
         if (dataToUpdate.score !== undefined) {
-            progressData[smallCode].correct = dataToUpdate.score;
+            progressData[categoryCode].correct = dataToUpdate.score;
         }
         if (dataToUpdate.total !== undefined) {
-            progressData[smallCode].total = dataToUpdate.total;
+            progressData[categoryCode].total = dataToUpdate.total;
         }
         localStorage.setItem('quizProgress', JSON.stringify(progressData));
     } catch (e) { console.error('進捗データの保存に失敗しました:', e); }
@@ -126,35 +116,24 @@ function updateProgressData(smallCode, dataToUpdate) {
  * =================================================================
  */
 
-// master_data.csvからカテゴリの階層構造を生成する
-function buildCategoryTree(masterData) {
-    const tree = {};
+// ★ 修正: master_data.csvからカテゴリのマップ（連想配列）を生成する
+function buildCategoryMap(masterData) {
+    const map = {};
     masterData.forEach(row => {
-        const { large_code, large_name, medium_code, medium_name, small_code, small_name, video_id } = row;
-        if (!large_code || !medium_code || !small_code) return;
-
-        if (!tree[large_code]) {
-            tree[large_code] = { name: large_name, children: {} };
+        if (row.category_code) {
+            map[row.category_code] = {
+                name: row.category_name,
+                videoId: row.video_id
+            };
         }
-        if (!tree[large_code].children[medium_code]) {
-            tree[large_code].children[medium_code] = { name: medium_name, children: {} };
-        }
-        tree[large_code].children[medium_code].children[small_code] = {
-            name: small_name,
-            videoId: video_id
-        };
     });
-    return tree;
+    return map;
 }
 
-// 指定カテゴリの問題を準備し、クイズを開始する
+// ★ 修正: 指定カテゴリの問題を準備し、クイズを開始する
 function prepareAndStartQuiz(params) {
-    // CSVのヘッダー名（large_code 등）を使って問題を絞り込む
-    const filteredData = allQuizData.filter(row => {
-        return row.large_code === params.l &&
-               row.medium_code === params.m &&
-               row.small_code === params.s;
-    });
+    // 1段階のcategory_codeを使って問題を絞り込む
+    const filteredData = allQuizData.filter(row => row.category_code === params.c);
 
     if (filteredData.length === 0) {
         alert('該当する問題データが見つかりませんでした。ダッシュボードに戻ります。');
@@ -162,17 +141,12 @@ function prepareAndStartQuiz(params) {
         return;
     }
 
-    // CSVのヘッダー名を使ってクイズデータを整形する
     quizData = filteredData.map(row => {
         const correctAnswer = row.correct_answer;
         const choices = [
-            row.correct_answer,
-            row.incorrect_1,
-            row.incorrect_2,
-            row.incorrect_3
-        ].filter(choice => choice); // 空の選択肢を除外
+            row.correct_answer, row.incorrect_1, row.incorrect_2, row.incorrect_3
+        ].filter(Boolean);
 
-        // 選択肢をシャッフル
         for (let i = choices.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [choices[i], choices[j]] = [choices[j], choices[i]];
@@ -183,8 +157,8 @@ function prepareAndStartQuiz(params) {
         return {
             id: row.id,
             question: row.question,
-            choices: choices,
-            answerIndex: answerIndex,
+            choices,
+            answerIndex,
             explanation: row.explanation
         };
     });
@@ -197,10 +171,6 @@ function startQuiz() {
     score = 0;
     userAnswers = [];
     startContainer.style.display = 'none';
-    videoContainer.style.display = 'none';
-    resultContainer.style.display = 'none';
-    reviewContainer.style.display = 'none';
-    historyContainer.style.display = 'none';
     quizContainer.style.display = 'block';
     showQuestion();
 }
@@ -220,7 +190,7 @@ function showQuestion() {
             button.style.backgroundColor = '';
             button.style.borderColor = '#ddd';
         } else {
-            button.style.display = 'none'; // 選択肢が4つ未満の場合、ボタンを隠す
+            button.style.display = 'none';
         }
     });
 }
@@ -278,8 +248,8 @@ function showResult() {
     resultGroupNameElement.textContent = currentGroupName;
     scoreElement.textContent = score;
     totalQuestionsElement.textContent = quizData.length;
-    const smallCode = document.body.dataset.currentSmallCode;
-    updateProgressData(smallCode, { score: score, total: quizData.length });
+    const categoryCode = document.body.dataset.currentCategoryCode; // ★ 修正
+    updateProgressData(categoryCode, { score: score, total: quizData.length });
 }
 
 function showReview() {
@@ -301,21 +271,16 @@ function showReview() {
 async function saveReviewAsImage() {
     saveReviewImageButton.disabled = true;
     saveReviewImageButton.textContent = '画像生成中...';
-    reviewList.style.maxHeight = 'none';
-    reviewList.style.overflowY = 'visible';
     try {
         const canvas = await html2canvas(reviewContainer, { backgroundColor: '#ffffff', scale: 2 });
         const imageUrl = canvas.toDataURL('image/png');
         const downloadLink = document.createElement('a');
-        const date = new Date();
-        const formattedDate = `${date.getFullYear()}${(date.getMonth() + 1).toString().padStart(2, '0')}${date.getDate().toString().padStart(2, '0')}`;
+        const formattedDate = new Date().toLocaleDateString('sv-SE').replace(/-/g, '');
         downloadLink.download = `quiz_review_${formattedDate}.png`;
         downloadLink.href = imageUrl;
         downloadLink.click();
-    } catch (error) { console.error('画像の生成に失敗しました:', error); alert('画像の保存に失敗しました。'); }
+    } catch (error) { console.error('画像の生成に失敗しました:', error); }
     finally {
-        reviewList.style.maxHeight = '400px';
-        reviewList.style.overflowY = 'auto';
         saveReviewImageButton.disabled = false;
         saveReviewImageButton.textContent = '解答を画像で保存';
     }
@@ -338,28 +303,24 @@ function showHistory() {
 }
 
 function showStartScreen() {
+    [videoContainer, quizContainer, resultContainer, reviewContainer, historyContainer].forEach(c => c.style.display = 'none');
     startContainer.style.display = 'block';
-    videoContainer.style.display = 'none';
-    quizContainer.style.display = 'none';
-    resultContainer.style.display = 'none';
-    reviewContainer.style.display = 'none';
-    historyContainer.style.display = 'none';
     if (youtubePlayer.src) youtubePlayer.src = '';
     showDashboard();
 }
 
-function handleStartFromDashboard(largeCode, mediumCode, smallCode, actionType) {
-    const { name: largeName, children: largeChildren } = categoryTree[largeCode];
-    const { name: mediumName, children: mediumChildren } = largeChildren[mediumCode];
-    const { name: smallName, videoId } = mediumChildren[smallCode];
-    currentGroupName = `${largeName} > ${mediumName} > ${smallName}`;
-    const params = { l: largeCode, m: mediumCode, s: smallCode };
-    document.body.dataset.currentSmallCode = smallCode;
+// ★ 修正: 引数を1段階のカテゴリコードに変更
+function handleStartFromDashboard(categoryCode, actionType) {
+    const category = categoryMap[categoryCode];
+    currentGroupName = category.name;
+    const videoId = category.videoId;
+    const params = { c: categoryCode }; // ★ URLパラメータを `c` に変更
+    document.body.dataset.currentCategoryCode = categoryCode; // ★ 修正
     startContainer.style.display = 'none';
 
     if (actionType === 'watch' && videoId) {
         showVideoScreen(videoId, params);
-        updateProgressData(smallCode, { video: true });
+        updateProgressData(categoryCode, { video: true });
     } else {
         prepareAndStartQuiz(params);
     }
@@ -378,56 +339,46 @@ function showVideoScreen(videoId, quizParams) {
     });
 }
 
+// ★ 修正: 1段階のカテゴリをダッシュボードに表示
 function showDashboard() {
     dashboardList.innerHTML = '';
     const progressData = getProgressData();
-    let hasContent = false;
-    Object.keys(categoryTree).forEach(largeCode => {
-        const largeCat = categoryTree[largeCode];
-        const largeHeader = document.createElement('h3');
-        largeHeader.className = 'dashboard-large-cat';
-        largeHeader.textContent = largeCat.name;
-        dashboardList.appendChild(largeHeader);
-        Object.keys(largeCat.children).forEach(mediumCode => {
-            const mediumCat = largeCat.children[mediumCode];
-            Object.keys(mediumCat.children).forEach(smallCode => {
-                hasContent = true;
-                const smallCat = mediumCat.children[smallCode];
-                const record = progressData[smallCode] || { videoViews: 0, correct: 0, total: 0 };
-                const item = document.createElement('div');
-                item.className = 'dashboard-item';
-                const scoreText = record.total > 0 ? `${record.correct} / ${record.total}` : '未挑戦';
-                const scoreClass = record.total > 0 && record.correct === record.total ? 'perfect' : '';
-                item.innerHTML = `
-                    <div class="dashboard-cat-name">
-                        <span class="medium-cat">${mediumCat.name}</span>
-                        <span class="small-cat">${smallCat.name}</span>
-                    </div>
-                    <div class="dashboard-progress">
-                        <span>視聴: ${record.videoViews}回</span>
-                        <span class="score ${scoreClass}">テスト: ${scoreText}</span>
-                    </div>
-                `;
-                const buttonContainer = document.createElement('div');
-                buttonContainer.className = 'dashboard-buttons';
-                const watchButton = document.createElement('button');
-                watchButton.textContent = '動画';
-                watchButton.className = 'dashboard-watch-btn';
-                watchButton.disabled = !smallCat.videoId;
-                watchButton.onclick = () => handleStartFromDashboard(largeCode, mediumCode, smallCode, 'watch');
-                const quizButton = document.createElement('button');
-                quizButton.textContent = 'テスト';
-                quizButton.className = 'dashboard-quiz-btn';
-                quizButton.onclick = () => handleStartFromDashboard(largeCode, mediumCode, smallCode, 'quiz');
-                buttonContainer.append(watchButton, quizButton);
-                item.appendChild(buttonContainer);
-                dashboardList.appendChild(item);
-            });
-        });
-    });
-    if (!hasContent) {
+    const categoryCodes = Object.keys(categoryMap);
+
+    if (categoryCodes.length === 0) {
         dashboardList.innerHTML = '<p>表示できるカテゴリがありません。master_data.csvの内容を確認してください。</p>';
+        return;
     }
+
+    categoryCodes.forEach(categoryCode => {
+        const category = categoryMap[categoryCode];
+        const record = progressData[categoryCode] || { videoViews: 0, correct: 0, total: 0 };
+        const item = document.createElement('div');
+        item.className = 'dashboard-item';
+        const scoreText = record.total > 0 ? `${record.correct} / ${record.total}` : '未挑戦';
+        const scoreClass = record.total > 0 && record.correct === record.total ? 'perfect' : '';
+        item.innerHTML = `
+            <div class="dashboard-cat-name">${category.name}</div>
+            <div class="dashboard-progress">
+                <span>視聴: ${record.videoViews}回</span>
+                <span class="score ${scoreClass}">テスト: ${scoreText}</span>
+            </div>
+        `;
+        const buttonContainer = document.createElement('div');
+        buttonContainer.className = 'dashboard-buttons';
+        const watchButton = document.createElement('button');
+        watchButton.textContent = '動画';
+        watchButton.className = 'dashboard-watch-btn';
+        watchButton.disabled = !category.videoId;
+        watchButton.onclick = () => handleStartFromDashboard(categoryCode, 'watch');
+        const quizButton = document.createElement('button');
+        quizButton.textContent = 'テスト';
+        quizButton.className = 'dashboard-quiz-btn';
+        quizButton.onclick = () => handleStartFromDashboard(categoryCode, 'quiz');
+        buttonContainer.append(watchButton, quizButton);
+        item.appendChild(buttonContainer);
+        dashboardList.appendChild(item);
+    });
 }
 
 
@@ -447,7 +398,7 @@ backToStartFromVideoButton.addEventListener('click', showStartScreen);
 
 /**
  * =================================================================
- *  初期化処理 (CSVファイルを読み込み、アプリを準備する)
+ *  初期化処理
  * =================================================================
  */
 async function initializePage() {
@@ -460,7 +411,7 @@ async function initializePage() {
         ]);
 
         if (!quizResponse.ok || !masterResponse.ok) {
-            throw new Error(`CSVファイルの取得に失敗: ${quizResponse.statusText}, ${masterResponse.statusText}`);
+            throw new Error(`CSVファイルの取得に失敗`);
         }
 
         const [quizCsvText, masterCsvText] = await Promise.all([
@@ -468,39 +419,27 @@ async function initializePage() {
             masterResponse.text()
         ]);
 
-        // ▼▼▼ ここからデバッグコード ▼▼▼
-        console.log("--- master_data.csvの生テキスト（ここが文字化けしていたらUTF-8で保存されていません） ---");
-        console.log(masterCsvText);
-
         allQuizData = Papa.parse(quizCsvText, { header: true, skipEmptyLines: true }).data;
         allMasterData = Papa.parse(masterCsvText, { header: true, skipEmptyLines: true }).data;
-
-        console.log("--- Papa Parseによる解析結果（配列の長さが0なら問題あり） ---");
-        console.log(allMasterData);
-        // ▲▲▲ ここまでデバッグコード ▲▲▲
         
         if (allMasterData.length === 0) {
-            // このエラーが現在表示されています
             throw new Error("master_data.csvが空か、正しく読み込めませんでした。");
         }
 
-        categoryTree = buildCategoryTree(allMasterData);
-
-        console.log("--- 生成されたカテゴリツリー（空の{}なら問題あり） ---");
-        console.log(categoryTree);
+        categoryMap = buildCategoryMap(allMasterData); // ★ 修正
 
         const params = new URLSearchParams(window.location.search);
-        const [l, m, s] = [params.get('l'), params.get('m'), params.get('s')];
+        const c = params.get('c'); // ★ URLパラメータを `c` に変更
 
-        if (l && m && s && categoryTree[l]?.children[m]?.children[s]) {
+        if (c && categoryMap[c]) {
             startContainer.style.display = 'none';
-            handleStartFromDashboard(l, m, s, 'quiz');
+            handleStartFromDashboard(c, 'quiz');
         } else {
             showDashboard();
         }
 
     } catch (error) {
         console.error("初期化エラー:", error);
-        startContainer.innerHTML = `<h2>エラー</h2><p>データの読み込みに失敗しました。以下の点を確認してください。<br>1. CSVファイル名（quiz_data.csv, master_data.csv）が正しいか。<br>2. CSVファイルがindex.htmlと同じ階層にアップロードされているか。<br>3. CSVファイルのヘッダー名が正しいか。</p>`;
+        startContainer.innerHTML = `<h2>エラー</h2><p>データの読み込みに失敗しました。CSVファイルと文字コード(UTF-8)を確認してください。</p>`;
     }
 }
