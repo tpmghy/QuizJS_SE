@@ -468,14 +468,26 @@ async function initializePage() {
             masterResponse.text()
         ]);
 
+        // ▼▼▼ ここからデバッグコード ▼▼▼
+        console.log("--- master_data.csvの生テキスト（ここが文字化けしていたらUTF-8で保存されていません） ---");
+        console.log(masterCsvText);
+
         allQuizData = Papa.parse(quizCsvText, { header: true, skipEmptyLines: true }).data;
         allMasterData = Papa.parse(masterCsvText, { header: true, skipEmptyLines: true }).data;
+
+        console.log("--- Papa Parseによる解析結果（配列の長さが0なら問題あり） ---");
+        console.log(allMasterData);
+        // ▲▲▲ ここまでデバッグコード ▲▲▲
         
         if (allMasterData.length === 0) {
+            // このエラーが現在表示されています
             throw new Error("master_data.csvが空か、正しく読み込めませんでした。");
         }
 
         categoryTree = buildCategoryTree(allMasterData);
+
+        console.log("--- 生成されたカテゴリツリー（空の{}なら問題あり） ---");
+        console.log(categoryTree);
 
         const params = new URLSearchParams(window.location.search);
         const [l, m, s] = [params.get('l'), params.get('m'), params.get('s')];
