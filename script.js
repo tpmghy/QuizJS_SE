@@ -123,7 +123,7 @@ function buildCategoryMap(masterData) {
         if (row.category_code) {
             map[row.category_code] = {
                 name: row.category_name,
-                videoId: row.video_id
+                videoId: row.video_id || '' // video_idが空でも空文字列として設定
             };
         }
     });
