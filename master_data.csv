@@ -1,7 +1,7 @@
-large_code,large_name,medium_code,medium_name,small_code,small_name,video_id,,,,,
-EN,英語,GR,文法,BE,be動詞,T5tygeUoHts,,,英語,文法,be動詞
-MA,数学,VC,語彙,GV,一般動詞,T5tygeUoHts,,,英語,文法,一般動詞
-JP,国語,AL,代数,N1,名詞,T5tygeUoHts,,,英語,語彙,名詞
-,,GE,幾何,EQ,方程式,T5tygeUoHts,,,数学,代数,方程式
-,,,,,,,,,数学,幾何,
-,,,,,,,,,国語,古文,
+large_code,large_name,medium_code,medium_name,small_code,small_name,video_id
+EN,英語,GR,文法,BE,be動詞,T5tygeUoHts
+EN,英語,GR,文法,GV,一般動詞,T5tygeUoHts
+EN,英語,VC,語彙,N1,名詞,T5tygeUoHts
+MA,数学,AL,代数,EQ,方程式,T5tygeUoHts
+MA,数学,GE,幾何,ALL,全範囲,
+JP,国語,CL,古文,ALL,全範囲,
