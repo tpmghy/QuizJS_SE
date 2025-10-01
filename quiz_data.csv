@@ -1,0 +1,11 @@
+id,large_name,medium_name,small_name,question,correct_answer,incorrect_1,incorrect_2,incorrect_3,explanation,large_code,medium_code,small_code
+Q0001,英語,文法,be動詞,I ( ) a student. の（ ）に入るのは？,am,is,are,be,「わたしは生徒です。」主語が I（わたし）のときは am を使います。,,,
+Q0002,英語,文法,be動詞,You ( ) very kind. の（ ）に入るのは？,are,is,am,be,「あなたはとても親切です。」主語が You（あなた）のときは are を使います。,,,
+Q0003,英語,文法,be動詞,He ( ) a great soccer player. の（ ）に入るのは？,is,am,are,be,「彼はすごいサッカー選手です。」主語が He（彼）で「１人」なので is を使います。,,,
+Q0004,英語,文法,be動詞,We ( ) good friends. の（ ）に入るのは？,are,is,am,be,「わたしたちは良い友達です。」主語が We（わたしたち）で「２人以上」なので are を使います。,,,
+Q0005,英語,文法,be動詞,This book ( ) interesting. の（ ）に入るのは？,is,am,are,be,「この本は面白いです。」主語が This book（この本）で「１つ」のものなので is を使います。,,,
+Q0006,英語,文法,be動詞,My parents ( ) in Tokyo. の（ ）に入るのは？,are,is,am,be,「私の両親は東京にいます。」主語が My parents（私の両親）で「２人以上」なので are を使います。,,,
+Q0007,英語,文法,be動詞,「be動詞」の仲間ではないものは次のうちどれ？,do,am,is,are,"be動詞の仲間は is, am, are の３つです。do は一般動詞です。",,,
+Q0008,英語,文法,be動詞,She ( ) happy now. の（ ）に入るのは？,is,am,are,be,「彼女は今、幸せです。」主語が She（彼女）で「１人」なので is を使います。,,,
+Q0009,英語,文法,be動詞,Taro and I ( ) classmates. の（ ）に入るのは？,are,is,am,be,「太郎とわたしはクラスメイトです。」主語が Taro and I（太郎とわたし）で「２人」なので are を使います。,,,
+Q0010,数学,代数,方程式,x + 5 = 10 の解は？,5,20,15,55,,,,
