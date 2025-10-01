@@ -118,8 +118,10 @@ function updateProgressData(categoryCode, dataToUpdate) { // ★ 引数をsmallC
 
 // ★ 修正: master_data.csvからカテゴリのマップ（連想配列）を生成する
 function buildCategoryMap(masterData) {
+    console.log('buildCategoryMap - masterData:', masterData); // デバッグ用
     const map = {};
     masterData.forEach(row => {
+        console.log('Processing row:', row); // デバッグ用
         if (row.category_code) {
             map[row.category_code] = {
                 name: row.category_name,
@@ -127,6 +129,7 @@ function buildCategoryMap(masterData) {
             };
         }
     });
+    console.log('Final categoryMap:', map); // デバッグ用
     return map;
 }
 
@@ -419,14 +422,19 @@ async function initializePage() {
             masterResponse.text()
         ]);
 
+        console.log('masterCsvText:', masterCsvText); // デバッグ用
+
         allQuizData = Papa.parse(quizCsvText, { header: true, skipEmptyLines: true }).data;
         allMasterData = Papa.parse(masterCsvText, { header: true, skipEmptyLines: true }).data;
+        
+        console.log('allMasterData after parsing:', allMasterData); // デバッグ用
         
         if (allMasterData.length === 0) {
             throw new Error("master_data.csvが空か、正しく読み込めませんでした。");
         }
 
         categoryMap = buildCategoryMap(allMasterData); // ★ 修正
+        console.log('categoryMap after build:', categoryMap); // デバッグ用
 
         const params = new URLSearchParams(window.location.search);
         const c = params.get('c'); // ★ URLパラメータを `c` に変更
