@@ -1,2 +1,8 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+# CSV files should be treated as text
+*.csv text eol=lf
+
+# Ensure proper MIME type for CSV files
+*.csv text/csv

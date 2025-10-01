@@ -404,34 +404,44 @@ backToStartFromVideoButton.addEventListener('click', showStartScreen);
  *  初期化処理
  * =================================================================
  */
-// 一時的な解決策：CSVデータを直接埋め込み
-const masterDataCsv = `category_code,category_name,video_id
-EN-GR-BE,英語-文法-be動詞,T5tygeUoHts
-EN-GR-GV,英語-文法-一般動詞,T5tygeUoHts
-EN-VC-N1,英語-語彙-名詞,T5tygeUoHts
-MA-AL-EQ,数学-代数-方程式,T5tygeUoHts
-MA-GE-ALL,数学-幾何-全範囲,
-JP-CL-ALL,国語-古文-全範囲,`;
-
-const quizDataCsv = `id,category_code,question,correct_answer,incorrect_1,incorrect_2,incorrect_3,explanation,large_code,medium_code,small_code
-Q0001,EN-GR-BE,I ( ) a student. の（ ）に入るのは？,am,is,are,be,「わたしは生徒です。」主語が I（わたし）のときは am を使います。,,,
-Q0002,EN-GR-BE,You ( ) very kind. の（ ）に入るのは？,are,is,am,be,「あなたはとても親切です。」主語が You（あなた）のときは are を使います。,,,
-Q0003,EN-GR-BE,He ( ) a great soccer player. の（ ）に入るのは？,is,am,are,be,「彼はすごいサッカー選手です。」主語が He（彼）で「１人」なので is を使います。,,,
-Q0004,EN-GR-BE,We ( ) good friends. の（ ）に入るのは？,are,is,am,be,「わたしたちは良い友達です。」主語が We（わたしたち）で「２人以上」なので are を使います。,,,
-Q0005,EN-GR-BE,This book ( ) interesting. の（ ）に入るのは？,is,am,are,be,「この本は面白いです。」主語が This book（この本）で「１つ」のものなので is を使います。,,,
-Q0006,EN-GR-BE,My parents ( ) in Tokyo. の（ ）に入るのは？,are,is,am,be,「私の両親は東京にいます。」主語が My parents（私の両親）で「２人以上」なので are を使います。,,,
-Q0007,EN-GR-BE,「be動詞」の仲間ではないものは次のうちどれ？,do,am,is,are,"be動詞の仲間は is, am, are の３つです。do は一般動詞です。",,,
-Q0008,EN-GR-BE,She ( ) happy now. の（ ）に入るのは？,is,am,are,be,「彼女は今、幸せです。」主語が She（彼女）で「１人」なので is を使います。,,,
-Q0009,EN-GR-BE,Taro and I ( ) classmates. の（ ）に入るのは？,are,is,am,be,「太郎とわたしはクラスメイトです。」主語が Taro and I（太郎とわたし）で「２人」なので are を使います。,,,
-Q0010,MA-AL-EQ,x + 5 = 10 の解は？,5,20,15,55,,,,`;
-
 async function initializePage() {
     dashboardList.innerHTML = '<p>データを読み込み中...</p>';
     
     try {
-        // CSVファイルの代わりに埋め込まれたデータを使用
-        allQuizData = Papa.parse(quizDataCsv, { header: true, skipEmptyLines: true }).data;
-        allMasterData = Papa.parse(masterDataCsv, { header: true, skipEmptyLines: true }).data;
+        const [quizResponse, masterResponse] = await Promise.all([
+            fetch('./quiz_data.csv'),
+            fetch('./master_data.csv')
+        ]);
+
+        // レスポンスの詳細をログ出力
+        console.log('quizResponse status:', quizResponse.status);
+        console.log('masterResponse status:', masterResponse.status);
+        console.log('quizResponse headers:', [...quizResponse.headers.entries()]);
+        console.log('masterResponse headers:', [...masterResponse.headers.entries()]);
+
+        if (!quizResponse.ok) {
+            throw new Error(`quiz_data.csvの取得に失敗: ${quizResponse.status} ${quizResponse.statusText}`);
+        }
+        if (!masterResponse.ok) {
+            throw new Error(`master_data.csvの取得に失敗: ${masterResponse.status} ${masterResponse.statusText}`);
+        }
+
+        const [quizCsvText, masterCsvText] = await Promise.all([
+            quizResponse.text(),
+            masterResponse.text()
+        ]);
+
+        console.log('quizCsvText length:', quizCsvText.length);
+        console.log('masterCsvText length:', masterCsvText.length);
+        console.log('masterCsvText preview:', masterCsvText.substring(0, 200));
+
+        // CSVファイルがHTMLを返している場合の検出
+        if (masterCsvText.includes('<!DOCTYPE html>') || masterCsvText.includes('<html')) {
+            throw new Error('master_data.csvがHTMLファイルを返しています。ファイルの配置を確認してください。');
+        }
+
+        allQuizData = Papa.parse(quizCsvText, { header: true, skipEmptyLines: true }).data;
+        allMasterData = Papa.parse(masterCsvText, { header: true, skipEmptyLines: true }).data;
         
         console.log('allMasterData after parsing:', allMasterData);
         
@@ -454,6 +464,18 @@ async function initializePage() {
 
     } catch (error) {
         console.error("初期化エラー:", error);
-        startContainer.innerHTML = `<h2>エラー</h2><p>データの読み込みに失敗しました。CSVファイルと文字コード(UTF-8)を確認してください。</p>`;
+        dashboardList.innerHTML = `
+            <div class="error-message">
+                <h3>データの読み込みに失敗しました</h3>
+                <p>エラー: ${error.message}</p>
+                <p>以下の点を確認してください：</p>
+                <ul>
+                    <li>CSVファイルが正しい場所に配置されているか</li>
+                    <li>ファイル名が正確か（master_data.csv, quiz_data.csv）</li>
+                    <li>ファイルがUTF-8でエンコードされているか</li>
+                    <li>ホスティングサービスでCSVファイルが正しく配信されているか</li>
+                </ul>
+            </div>
+        `;
     }
 }
