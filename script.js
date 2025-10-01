@@ -5,7 +5,7 @@
  *  パスワード認証
  * =================================================================
  */
-const CORRECT_PASSWORD = 'your_password_here'; // ★★★ 必ず実際のパスワードに変更してください ★★★
+const CORRECT_PASSWORD = 'quiz1234'; // ★★★ 必ず実際のパスワードに変更してください ★★★
 const passwordContainer = document.getElementById('password-container');
 const passwordInput = document.getElementById('password-input');
 const passwordSubmitBtn = document.getElementById('password-submit-btn');
